@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pembayaran & Pengiriman</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+  <link rel="stylesheet" href="/css/pembayaran.css" />
+</head>
+<body class="bg-light">
+  <div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <div>
+        <div class="pay-eyebrow">TRANSACTION CENTER</div>
+        <h2 class="fw-bold mb-1">Pembayaran & Pengiriman</h2>
+        <div class="text-secondary">Kelola pembayaran dan pengiriman barang.</div>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Kembali</a>
+        <a href="/pembayaran/baru" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tambah pembayaran/pengiriman baru</a>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm pay-card">
+      <div class="card-header bg-white border-0 p-3 p-lg-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+          <h5 class="fw-bold mb-1">Daftar Pembayaran / Pengiriman</h5>
+          <small class="text-secondary">Klik Register No untuk melihat detail. Detail transaksi yang sudah tersimpan bersifat read-only.</small>
+        </div>
+        <div class="input-group pay-search">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input id="search" class="form-control" placeholder="Cari register, nama, kota..." />
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 pay-table">
+          <thead class="table-light">
+            <tr>
+              <th>Register No</th><th>Kirim</th><th>Alamat</th><th>Nama Kirim</th>
+              <th>Kelurahan</th><th>Kecamatan</th><th>Wilayah</th><th>Kota</th>
+              <th>Kode Pos</th><th class="text-end">Bayar</th><th class="text-end">Ongkir</th><th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="rows"><tr><td colspan="12" class="text-center py-5 text-secondary">Memuat data...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card-footer bg-white border-0 d-flex justify-content-center align-items-center gap-3 py-3">
+        <button id="prev" class="btn btn-sm btn-outline-secondary">← Sebelumnya</button>
+        <span id="pageInfo" class="small text-secondary"></span>
+        <button id="next" class="btn btn-sm btn-outline-secondary">Berikutnya →</button>
+      </div>
+    </div>
+  </div>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/pembayaran.js"></script>
+</body>
+</html>

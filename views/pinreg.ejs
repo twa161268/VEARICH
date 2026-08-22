@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transaksi Pembelian PIN</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+    <link rel="stylesheet" href="/css/pinreg.css" />
+  </head>
+  <body class="bg-light">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+      <div
+        class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+      >
+        <div>
+          <div class="pin-eyebrow">TRANSACTION CENTER</div>
+          <h2 class="fw-bold mb-1">Transaksi Pembelian PIN</h2>
+          <div class="text-secondary">
+            Kelola transaksi pembelian PIN dengan cepat dan mudah.
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/" class="btn btn-outline-secondary"
+            ><i class="bi bi-arrow-left me-1"></i> Kembali</a
+          >
+          <button id="btnTambah" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Transaksi
+          </button>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="pin-stat">
+            <span>Total transaksi</span><strong id="statTotal">0</strong>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="pin-stat">
+            <span>Ditampilkan</span><strong id="statShown">0</strong>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="pin-stat">
+            <span>Valid</span><strong id="statValid">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm pin-card">
+        <div class="card-header bg-white border-0 p-3 p-lg-4">
+          <div
+            class="d-flex flex-wrap justify-content-between align-items-center gap-3"
+          >
+            <div>
+              <h5 class="fw-bold mb-1">Daftar Transaksi</h5>
+              <small class="text-secondary"
+                >Klik Order No untuk membuka transaksi.</small
+              >
+            </div>
+            <div class="input-group pin-search">
+              <span class="input-group-text bg-light border-end-0"
+                ><i class="bi bi-search"></i
+              ></span>
+              <input
+                id="search"
+                class="form-control bg-light border-start-0"
+                placeholder="Cari order, nama, sponsor..."
+              />
+            </div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" id="tblPinreg">
+            <thead>
+              <tr>
+                <th>Order No</th>
+                <th>Nama</th>
+                <th>Username Sponsor</th>
+                <th>Tgl. Transaksi</th>
+                <th class="text-end">Total Harga</th>
+                <th class="text-end">Total PIN</th>
+                <th class="text-end">Total BV</th>
+                <th>status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr>
+                <td colspan="9" class="text-center py-5 text-secondary">
+                  Memuat data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="card-footer bg-white border-0 d-flex justify-content-center align-items-center gap-3 py-3"
+        >
+          <button id="prev" class="btn btn-sm btn-outline-secondary">
+            ← Sebelumnya
+          </button>
+          <span id="pageInfo" class="small text-secondary"></span>
+          <button id="next" class="btn btn-sm btn-outline-secondary">
+            Berikutnya →
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.PINREG_PRICECODE = '<%= pricecode %>';
+    </script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/pinreg.js"></script>
+  </body>
+</html>

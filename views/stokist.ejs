@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+  </head>
+  <body class="p-3">
+    <!--
+<h5>Main Form</h5>
+
+<div class="mb-3">
+    <div class="d-flex align-items-center mb-2">
+        <label style="width:150px;">ID Karyawan</label>
+        <input id="idk" class="form-control form-control-sm">
+    </div>
+
+    <div class="d-flex align-items-center mb-2">
+        <label style="width:150px;">Nama Karyawan</label>
+        <input id="nama" class="form-control form-control-sm">
+    </div>
+
+    <div class="d-flex align-items-center mb-2">
+        <label style="width:150px;">Jabatan</label>
+        <input id="jabatan" class="form-control form-control-sm">
+    </div>
+
+    <button id="btnTambah" class="btn btn-primary btn-sm">Tambah Data</button>
+    <button id="btnSimpan" class="btn btn-success btn-sm">Simpan Data</button>
+</div>
+
+<hr>
+-->
+
+    <!-- TOMBOL TAMBAH (DI ATAS) -->
+    <button id="btnShowForm" class="btn btn-primary btn-sm mb-3">
+      Tambah Data
+    </button>
+
+    <!-- MAIN FORM (AWALNYA HIDDEN) -->
+    <div id="mainForm" style="display: none">
+      <h5>Main Form</h5>
+
+      <div class="mb-3">
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">ID Stokist</label>
+          <input id="stkid" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Nama Stokist</label>
+          <input id="namastk" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Username</label>
+          <input id="username" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Alamat</label>
+          <input id="alamat" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Telepon</label>
+          <input id="telepon" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Wilayah</label>
+          <input id="wilayah" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Kota</label>
+          <input id="kota" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Tgl. Join</label>
+          <input id="tgljoin" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Grade</label>
+          <input id="grade" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Persentase</label>
+          <input id="persentase" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex align-items-center mb-2">
+          <label style="width: 150px">Tipe Stokist</label>
+          <input id="stktype" class="form-control form-control-sm" />
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+          <button id="btnSimpan" type="button" class="btn btn-success btn-sm">
+            Simpan Data
+          </button>
+          <button id="btnBatal" type="button" class="btn btn-success btn-sm">
+            Batal Simpan
+          </button>
+        </div>
+      </div>
+
+      <hr />
+    </div>
+
+    <!--<h5>Listing</h5>-->
+
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+      <!-- SEARCH -->
+      <input
+        id="carik"
+        class="form-control form-control-sm"
+        style="width: 250px"
+      />
+      <button id="btnCarik" class="btn btn-info btn-sm">
+        <i class="bi bi-search"></i>
+      </button>
+
+      <!-- DELETE -->
+      <input
+        type="checkbox"
+        id="chkHeaderk"
+        style="transform: scale(1.3); margin-left: 1px"
+      />
+      <button id="btnDeletek" class="btn btn-info btn-sm ms-3">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+
+    <table class="table table-striped" id="tblStokist">
+      <thead class="table-dark">
+        <tr>
+          <th>ID STOKIST</th>
+          <th>NAMA STOKIST</th>
+          <th>USERNAME</th>
+          <th class="text-center">✓</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script src="/js/stokist.js"></script>
+  </body>
+</html>

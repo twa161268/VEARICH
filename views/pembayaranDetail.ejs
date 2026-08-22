@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail <%= data.header.registerno %></title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+  <link rel="stylesheet" href="/css/pembayaran.css" />
+</head>
+<body class="bg-light">
+<div class="container-fluid px-3 px-lg-4 py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><div class="pay-eyebrow">TRANSACTION CENTER</div><h2 class="fw-bold mb-1">Detail Pembayaran & Pengiriman</h2><div class="text-secondary">Register <strong><%= data.header.registerno %></strong> — READ ONLY</div></div>
+    <div class="d-flex gap-2"><a href="/pembayaran" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Kembali</a><a href="/pembayaran/print/<%= encodeURIComponent(data.header.registerno) %>" target="_blank" class="btn btn-primary"><i class="bi bi-printer me-1"></i>Cetak Nota</a></div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-7"><div class="card border-0 shadow-sm pay-card h-100"><div class="card-header bg-white border-0 p-3"><h5 class="fw-bold mb-0">Informasi Pengiriman</h5></div><div class="card-body"><div class="row g-2 small">
+      <div class="col-md-6"><strong>Register No</strong><br><%= data.header.registerno %></div>
+      <div class="col-md-6"><strong>Kirim Barang</strong><br><%= data.header.kirim ? 'Ya' : 'Tidak' %></div>
+      <div class="col-md-6"><strong>Nama Kirim</strong><br><%= data.header.namakirim || '-' %></div>
+      <div class="col-md-6"><strong>Alamat</strong><br><%= data.header.alamat || '-' %></div>
+      <div class="col-md-6"><strong>Kelurahan</strong><br><%= data.header.kelurahan || '-' %></div>
+      <div class="col-md-6"><strong>Kecamatan</strong><br><%= data.header.kecamatan || '-' %></div>
+      <div class="col-md-4"><strong>Wilayah</strong><br><%= data.header.wilayah || '-' %></div>
+      <div class="col-md-4"><strong>Kota</strong><br><%= data.header.kota || '-' %></div>
+      <div class="col-md-4"><strong>Kode Pos</strong><br><%= data.header.kodepos || '-' %></div>
+    </div></div></div></div>
+    <div class="col-lg-5"><div class="pay-total-box shadow-sm h-100"><div class="mb-3"><small>Total Barang</small><strong>Rp <%= Number(data.transactions.reduce((s,r)=>s+Number(r.total_harga||0),0)).toLocaleString('id-ID') %></strong></div><div class="mb-3"><small>Ongkos Kirim</small><strong>Rp <%= Number(data.header.ongkir||0).toLocaleString('id-ID') %></strong></div><div class="border-top pt-3"><small>TOTAL TAGIHAN</small><strong>Rp <%= Number(data.header.bayar||0).toLocaleString('id-ID') %></strong></div><div class="mt-3"><small>Total Pembayaran</small><strong>Rp <%= Number(data.payments.reduce((s,r)=>s+Number(r.amount||0),0)).toLocaleString('id-ID') %></strong></div></div></div>
+  </div>
+
+  <div class="card border-0 shadow-sm pay-card mb-3"><div class="card-header bg-white border-0 p-3"><h5 class="fw-bold mb-0">Daftar Transaksi PIN</h5></div><div class="table-responsive"><table class="table table-hover align-middle mb-0 pay-table"><thead class="table-light"><tr><th>Order No</th><th>Nama</th><th>Username Sponsor</th><th>Tgl. Transaksi</th><th class="text-end">Total Harga</th><th class="text-end">Total PIN</th><th class="text-end">Total BV</th><th>Bayar</th></tr></thead><tbody>
+  <% data.transactions.forEach(r => { %><tr><td><strong><%= r.orderno %></strong></td><td><%= r.nama || '-' %></td><td><%= r.usernamesp || '-' %></td><td><%= r.createdt ? new Date(r.createdt).toLocaleDateString('id-ID') : '-' %></td><td class="text-end">Rp <%= Number(r.total_harga||0).toLocaleString('id-ID') %></td><td class="text-end"><%= Number(r.total_pin||0).toLocaleString('id-ID') %></td><td class="text-end"><%= Number(r.total_bv||0).toLocaleString('id-ID') %></td><td><span class="badge text-bg-success">Sudah Bayar</span></td></tr><% }) %>
+  <% if (!data.transactions.length) { %><tr><td colspan="8" class="text-center py-4 text-secondary">Tidak ada transaksi PIN.</td></tr><% } %>
+  </tbody></table></div></div>
+
+  <div class="card border-0 shadow-sm pay-card"><div class="card-header bg-white border-0 p-3"><h5 class="fw-bold mb-0">Rincian Pembayaran</h5></div><div class="table-responsive"><table class="table table-hover align-middle mb-0 pay-table"><thead class="table-light"><tr><th>Paytype</th><th>Deskripsi</th><th class="text-end">Amount</th><th>Catatan</th></tr></thead><tbody>
+  <% data.payments.forEach(p => { %><tr><td><%= p.paytype %></td><td><%= p.deskripsi || '-' %></td><td class="text-end">Rp <%= Number(p.amount||0).toLocaleString('id-ID') %></td><td><%= p.catatan || '-' %></td></tr><% }) %>
+  <% if (!data.payments.length) { %><tr><td colspan="4" class="text-center py-4 text-secondary">Tidak ada data pembayaran.</td></tr><% } %>
+  </tbody></table></div></div>
+</div>
+</body>
+</html>

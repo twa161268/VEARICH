@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tambah Pembayaran & Pengiriman</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+    <link rel="stylesheet" href="/css/pembayaran.css" />
+  </head>
+  <body class="bg-light">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+      <div
+        class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+      >
+        <div>
+          <div class="pay-eyebrow">TRANSACTION CENTER</div>
+          <h2 class="fw-bold mb-1">Pembayaran & Pengiriman Baru</h2>
+          <div class="text-secondary">
+            Pilih transaksi yang belum dibayar, tentukan pengiriman, lalu
+            masukkan pembayaran.
+          </div>
+        </div>
+        <a href="/pembayaran" class="btn btn-outline-secondary"
+          ><i class="bi bi-arrow-left me-1"></i>Kembali</a
+        >
+      </div>
+
+      <form id="paymentForm">
+        <div class="row g-3">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm pay-card mb-3">
+              <div
+                class="card-header bg-white border-0 p-3 p-lg-4 d-flex justify-content-between align-items-center gap-2"
+              >
+                <div>
+                  <h5 class="fw-bold mb-1">Daftar Transaksi</h5>
+                  <small class="text-secondary"
+                    >Hanya transaksi dengan status
+                    <strong>stbayar = false</strong>.</small
+                  >
+                </div>
+                <div class="input-group" style="max-width: 320px">
+                  <span class="input-group-text bg-white"
+                    ><i class="bi bi-search"></i></span
+                  ><input
+                    id="searchTrans"
+                    class="form-control"
+                    placeholder="Cari order, nama, sponsor..."
+                  />
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 pay-table">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Order No</th>
+                      <th>Nama</th>
+                      <th>Username Sponsor</th>
+                      <th>Tgl. Transaksi</th>
+                      <th class="text-end">Total Harga</th>
+                      <th class="text-end">Total PIN</th>
+                      <th class="text-end">Total BV</th>
+                      <th>Bayar</th>
+                      <th class="text-center">Pilih</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transactionRows">
+                    <tr>
+                      <td colspan="9" class="text-center py-5 text-secondary">
+                        Memuat data...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div
+                class="card-footer bg-white border-0 d-flex justify-content-center align-items-center gap-3 py-3"
+              >
+                <button
+                  type="button"
+                  id="prevTrans"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  ← Sebelumnya</button
+                ><span id="transPageInfo" class="small text-secondary"></span
+                ><button
+                  type="button"
+                  id="nextTrans"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  Berikutnya →
+                </button>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm pay-card mb-3">
+              <div class="card-header bg-white border-0 p-3 p-lg-4">
+                <h5 class="fw-bold mb-1">Data Pengiriman</h5>
+                <small class="text-secondary"
+                  >Register No dibuat otomatis. User, STKID, dan waktu transaksi
+                  diambil dari session/database.</small
+                >
+              </div>
+              <div class="card-body p-3 p-lg-4">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Register No</label
+                    ><input
+                      id="registerno"
+                      class="form-control readonly"
+                      readonly
+                      value="OTOMATIS"
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Kirim Barang</label
+                    ><select id="kirim" class="form-select">
+                      <option value="false">Tidak</option>
+                      <option value="true">Ya</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" id="labelNamakirim"
+                      >Nama Kirim</label
+                    ><input
+                      id="namakirim"
+                      maxlength="50"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" id="labelAlamat"
+                      >Alamat</label
+                    ><input id="alamat" maxlength="100" class="form-control" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Kelurahan</label
+                    ><input
+                      id="kelurahan"
+                      maxlength="50"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Kecamatan</label
+                    ><input
+                      id="kecamatan"
+                      maxlength="50"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Wilayah</label
+                    ><input id="wilayah" maxlength="50" class="form-control" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Kota</label
+                    ><input id="kota" maxlength="50" class="form-control" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Kode Pos</label
+                    ><input id="kodepos" maxlength="10" class="form-control" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Ongkos Kirim</label
+                    ><input
+                      id="ongkir"
+                      class="form-control money-input"
+                      inputmode="decimal"
+                      value="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm pay-card">
+              <div
+                class="card-header bg-white border-0 p-3 p-lg-4 d-flex justify-content-between align-items-center"
+              >
+                <div>
+                  <h5 class="fw-bold mb-1">Rincian Pembayaran</h5>
+                  <small class="text-secondary"
+                    >Deskripsi otomatis dari tabel payment.</small
+                  >
+                </div>
+                <button
+                  type="button"
+                  id="btnAddPayment"
+                  class="btn btn-primary btn-sm"
+                >
+                  <i class="bi bi-plus-lg me-1"></i>Tambah Pembayaran
+                </button>
+              </div>
+              <div class="card-body p-3 p-lg-4">
+                <div id="paymentRows"></div>
+                <div
+                  id="paymentEmpty"
+                  class="pay-detail-box text-center text-secondary py-4"
+                >
+                  Belum ada pembayaran. Klik Tambah Pembayaran.
+                </div>
+                <div class="row justify-content-end mt-3">
+                  <div class="col-md-5">
+                    <div
+                      class="d-flex justify-content-between border-top pt-2 fw-bold"
+                    >
+                      <span>Total Bayar</span
+                      ><span id="totalPayment">Rp 0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="pay-sticky">
+              <div class="pay-total-box shadow-sm mb-3">
+                <div class="mb-3">
+                  <small>Total Transaksi PIN</small
+                  ><strong id="totalGoods">Rp 0</strong>
+                </div>
+                <div class="mb-3">
+                  <small>Ongkos Kirim</small
+                  ><strong id="totalShipping">Rp 0</strong>
+                </div>
+                <div class="border-top pt-3">
+                  <small>TOTAL TAGIHAN</small
+                  ><strong id="grandTotal">Rp 0</strong>
+                </div>
+              </div>
+              <div class="card border-0 shadow-sm pay-card">
+                <div class="card-body">
+                  <div class="small text-secondary mb-2">Status validasi</div>
+                  <div id="paymentStatus" class="alert alert-secondary mb-0">
+                    Pilih transaksi dan masukkan pembayaran.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <a href="/pembayaran" class="btn btn-outline-secondary">Batal</a
+          ><button id="btnSimpan" class="btn btn-primary px-4">
+            <i class="bi bi-check2-circle me-1"></i>Simpan Transaksi
+          </button>
+        </div>
+      </form>
+    </div>
+    <script>
+      window.PAYMENT_PAGE = true;
+    </script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/pembayaranForm.js"></script>
+  </body>
+</html>

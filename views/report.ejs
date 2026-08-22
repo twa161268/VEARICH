@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<base href="http://localhost:3000/">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+<style>
+body {
+    font-family: Arial;
+    font-size: 10.5px;
+    margin: 15px;
+}
+
+.title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.info {
+    margin-bottom: 8px;
+}
+
+.info p {
+    margin: 1px 0;
+}
+
+.section-title {
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 3px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+    table-layout: fixed;
+}
+
+th {
+    background-color: #eee;
+    text-align: center;
+}
+
+td, th {
+    border: 1px solid black;
+    padding: 3px;
+    line-height: 1.2;
+}
+
+/* Lebar kolom */
+th:nth-child(1), td:nth-child(1) {
+    width: 55%;
+}
+
+th:nth-child(2), td:nth-child(2),
+th:nth-child(3), td:nth-child(3),
+th:nth-child(4), td:nth-child(4) {
+    width: 15%;
+    text-align: center;
+}
+
+/* Angka rata tengah */
+.text-right {
+    text-align: center;
+}
+
+.total-row {
+    font-weight: bold;
+    background-color: #f5f5f5;
+}
+
+.summary {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.summary p {
+    margin: 2px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="title">Penilaian Point Bonus Untuk Staff</div>
+
+<div class="info">
+    <p><b>ID:</b> <%= d.idk %></p>
+    <p><b>Nama:</b> <%= d.nama %></p>
+    <p><b>Jabatan:</b> <%= d.jabatan %></p>
+    <p><b>Periode:</b> <%= new Date(d.period).toISOString().slice(0,10) %></p>
+    <p><b>Nilai Bonus:</b> <%= d.nilaibonus %></p>
+</div>
+
+<div class="section-title">STANDAR</div>
+<table>
+<tr>
+<th>Prestasi</th>
+<th>Pengulangan</th>
+<th>Poin</th>
+<th>Nilai</th>
+</tr>
+
+<tr>
+<td>Cuti/Sakit</td>
+<td><%= d.cutisakit %></td>
+<td><%= d.cutisakita %></td>
+<td><%= d.cutisakitb %></td>
+</tr>
+
+<tr>
+<td>Telat > 30 Menit</td>
+<td><%= d.telatu30 %></td>
+<td><%= d.telatu30a %></td>
+<td><%= d.telatu30b %></td>
+</tr>
+
+<tr>
+<td>Telat < 30 Menit</td>
+<td><%= d.telatd30 %></td>
+<td><%= d.telatd30a %></td>
+<td><%= d.telatd30b %></td>
+</tr>
+
+<tr>
+<td>Telat > 60 Menit</td>
+<td><%= d.telatu60 %></td>
+<td><%= d.telatu60a %></td>
+<td><%= d.telatu60b %></td>
+</tr>
+
+<tr>
+<td>Lupa Absen</td>
+<td><%= d.lupa %></td>
+<td><%= d.lupaa %></td>
+<td><%= d.lupab %></td>
+</tr>
+
+<tr class="total-row">
+<td>Total</td>
+<td></td>
+<td></td>
+<td><%= d.totals %></td>
+</tr>
+</table>
+
+<div class="section-title">REWARD</div>
+<table>
+<tr>
+<th>Prestasi</th>
+<th>Pengulangan</th>
+<th>Poin</th>
+<th>Nilai</th>
+</tr>
+
+<tr>
+<td>Kehadiran Full</td>
+<td><%= d.hadirfull %></td>
+<td><%= d.hadirfulla %></td>
+<td><%= d.hadirfullb %></td>
+</tr>
+
+<tr>
+<td>Masuk Ontime</td>
+<td><%= d.ontime %></td>
+<td><%= d.ontimea %></td>
+<td><%= d.ontimeb %></td>
+</tr>
+
+<tr>
+<td>Overtime</td>
+<td><%= d.ovrmnt %></td>
+<td><%= d.ovrmnta %></td>
+<td><%= d.ovrmntb %></td>
+</tr>
+
+<tr>
+<td>Kerja Hari Libur</td>
+<td><%= d.kerjalibur %></td>
+<td><%= d.kerjalibura %></td>
+<td><%= d.kerjaliburb %></td>
+</tr>
+
+<tr>
+<td>Reward</td>
+<td><%= d.reward %></td>
+<td><%= d.rewarda %></td>
+<td><%= d.rewardb %></td>
+</tr>
+
+<tr class="total-row">
+<td>Total</td>
+<td></td>
+<td></td>
+<td><%= d.totalr %></td>
+</tr>
+</table>
+
+<div class="section-title">PUNISHMENT</div>
+<table>
+<tr>
+<th>Prestasi</th>
+<th>Pengulangan</th>
+<th>Poin</th>
+<th>Nilai</th>
+</tr>
+
+<tr>
+<td>Lalai</td>
+<td><%= d.lalai %></td>
+<td><%= d.lalaia %></td>
+<td><%= d.lalaib %></td>
+</tr>
+
+<tr>
+<td>Tunda pekerjaan</td>
+<td><%= d.tunda %></td>
+<td><%= d.tundaa %></td>
+<td><%= d.tundab %></td>
+</tr>
+
+<tr>
+<td>Alpha</td>
+<td><%= d.alpha %></td>
+<td><%= d.alphaa %></td>
+<td><%= d.alphab %></td>
+</tr>
+
+<tr class="total-row">
+<td>Total</td>
+<td></td>
+<td></td>
+<td><%= d.totalp %></td>
+</tr>
+</table>
+
+<div class="summary">
+<p>TOTAL NILAI: <%= d.totalnilai %></p>
+<p>TOTAL %: <%= d.totalpersen %></p>
+<p>BONUS ACTUAL: <%= d.bnsactual %></p>
+</div>
+
+</body>
+</html>

@@ -118,6 +118,7 @@ exports.login = async (req, res) => {
 
     req.session.user = username;
     req.session.stkid = user.stkid;
+    req.session.role = user.role;
 
     req.session.param = {
       pricecode: param.pricecode,

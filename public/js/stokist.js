@@ -161,7 +161,6 @@ async function loadDatak() {
         tbody.innerHTML += `
             <tr>
             <td onclick="selectRow('${row.stkid}')">${row.stkid}</td>
-            <td>${row.stkid}</td>
             <td>${row.namastk}</td>
             <td>${row.username}</td>
 

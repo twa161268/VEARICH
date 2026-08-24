@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/pembayaranController');
 const { isAuth } = require('../middleware/auth');
+const { requireRole } = require('../middleware/authMiddleware');
 
 router.use(isAuth);
+router.use(requireRole('admin', 'stokist'));
 
 router.get('/', ctrl.page);
 router.get('/baru', ctrl.newForm);

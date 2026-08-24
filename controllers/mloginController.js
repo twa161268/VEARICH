@@ -91,7 +91,7 @@ exports.create = async (req, res) => {
         stkid,
         userrole,
         useractive,
-        req.session.username,
+        req.session.user,
       ]
     );
 

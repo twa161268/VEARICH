@@ -36,6 +36,7 @@ app.use(
       schemaName: 'public',
       tableName: 'user_sessions',
       pruneSessionInterval: 900,
+      disableTouch: true,
     }),
 
     secret: process.env.SESSION_SECRET || 'secret123',

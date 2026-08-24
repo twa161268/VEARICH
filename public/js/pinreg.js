@@ -32,17 +32,17 @@ async function loadData() {
   const x = json.data;
   $('statTotal').textContent = x.total.toLocaleString('id-ID');
   $('statShown').textContent = x.rows.length.toLocaleString('id-ID');
-  $('statValid').textContent = x.rows
-    .filter((r) => r.validz === true || r.validz === 1 || r.validz === '1')
+  $('statLunas').textContent = x.rows
+    .filter((r) => r.stbayar === true || r.stbayar === 1 || r.stbayar === '1')
     .length.toLocaleString('id-ID');
   $('rows').innerHTML = x.rows.length
     ? x.rows
         .map(
           (r) =>
-            `<tr><td><a class="fw-bold text-primary text-decoration-none" href="/pinreg/form/${encodeURIComponent(r.orderno)}">${esc(r.orderno)}</a></td><td><strong>${esc(r.nama || '-')}</strong></td><td>${esc(r.usernamesp || '-')}</td><td>${r.createdt ? new Date(r.createdt).toLocaleDateString('id-ID') : '-'}</td><td class="text-end">${money(r.total_harga)}</td><td class="text-end">${Number(r.total_pin || 0).toLocaleString('id-ID')}</td><td class="text-end">${Number(r.total_bv || 0).toLocaleString('id-ID')}</td><td>${r.stbayar === true ? '<span class="badge text-bg-success">yes</span>' : '<span class="badge text-bg-secondary">not yet</span>'}</td><td><a class="btn btn-sm btn-outline-primary" href="/pinreg/form/${encodeURIComponent(r.orderno)}">Buka</a></td></tr>`
+            `<tr><td><a class="fw-bold text-primary text-decoration-none" href="/pinreg/form/${encodeURIComponent(r.orderno)}">${esc(r.orderno)}</a></td><td>${esc(r.registerno || '-')}</td><td><strong>${esc(r.nama || '-')}</strong></td><td>${esc(r.usernamesp || '-')}</td><td>${r.createdt ? new Date(r.createdt).toLocaleDateString('id-ID') : '-'}</td><td class="text-end">${money(r.total_harga)}</td><td class="text-end">${Number(r.total_pin || 0).toLocaleString('id-ID')}</td><td class="text-end">${Number(r.total_bv || 0).toLocaleString('id-ID')}</td><td>${r.stbayar === true ? '<span class="badge text-bg-success">sudah</span>' : '<span class="badge text-bg-secondary">belum</span>'}</td><td><a class="btn btn-sm btn-outline-primary" href="/pinreg/form/${encodeURIComponent(r.orderno)}">Buka</a></td></tr>`
         )
         .join('')
-    : '<tr><td colspan="9" class="text-center py-5 text-secondary">Belum ada transaksi.</td></tr>';
+    : '<tr><td colspan="10" class="text-center py-5 text-secondary">Belum ada transaksi.</td></tr>';
   const pages = Math.max(1, Math.ceil(x.total / x.limit));
   $('pageInfo').textContent = `Halaman ${x.page} / ${pages}`;
   $('prev').disabled = x.page <= 1;

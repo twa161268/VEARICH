@@ -8,6 +8,7 @@ async function list({ search = '', page = 1, limit = 20 }) {
     `
     SELECT
       r.orderno,
+      r.registerno,
       r.nama,
       r.usernamesp,
       r.createdt,
@@ -20,7 +21,7 @@ async function list({ search = '', page = 1, limit = 20 }) {
     WHERE r.orderno ILIKE $1
        OR COALESCE(r.nama, '') ILIKE $1
        OR COALESCE(r.usernamesp, '') ILIKE $1
-    GROUP BY r.orderno, r.nama, r.usernamesp, r.createdt, r.validz, r.stbayar
+    GROUP BY r.orderno,r.registerno,  r.nama, r.usernamesp, r.createdt, r.validz, r.stbayar
     ORDER BY r.createdt DESC NULLS LAST, r.orderno DESC
     LIMIT $2 OFFSET $3
   `,

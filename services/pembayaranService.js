@@ -15,7 +15,9 @@ function clean(value) {
 
 function parseMoney(value, fieldName) {
   if (value === null || value === undefined || value === '') return '0.00';
-  let raw = String(value).trim().replace(/[^0-9.,]/g, '');
+  let raw = String(value)
+    .trim()
+    .replace(/[^0-9.,]/g, '');
   if (!raw) fail(`${fieldName} tidak valid.`);
 
   const lastComma = raw.lastIndexOf(',');
@@ -32,7 +34,8 @@ function parseMoney(value, fieldName) {
     raw = decimals <= 2 ? raw.replace(',', '.') : raw.replace(/,/g, '');
   } else if (lastDot >= 0) {
     const decimals = raw.length - lastDot - 1;
-    if ((raw.match(/\./g) || []).length > 1 || decimals > 2) raw = raw.replace(/\./g, '');
+    if ((raw.match(/\./g) || []).length > 1 || decimals > 2)
+      raw = raw.replace(/\./g, '');
   }
 
   if (!/^\d+(\.\d{1,2})?$/.test(raw)) fail(`${fieldName} tidak valid.`);
@@ -49,19 +52,32 @@ function validateCreateBody(body) {
   if (!body || !Array.isArray(body.ordernos) || body.ordernos.length === 0)
     fail('Minimal satu transaksi PIN harus dipilih.');
 
-  const ordernos = [...new Set(body.ordernos.map((x) => String(x).trim()).filter(Boolean))];
+  const ordernos = [
+    ...new Set(body.ordernos.map((x) => String(x).trim()).filter(Boolean)),
+  ];
   if (!ordernos.length) fail('Minimal satu transaksi PIN harus dipilih.');
 
-  const kirim = body.kirim === true || body.kirim === 'true' || body.kirim === 1 || body.kirim === '1';
+  const kirim =
+    body.kirim === true ||
+    body.kirim === 'true' ||
+    body.kirim === 1 ||
+    body.kirim === '1';
   const ongkir = parseMoney(body.ongkir, 'Ongkos kirim');
 
-  if (kirim && !clean(body.namakirim)) fail('Nama kirim wajib diisi jika kirim barang aktif.');
-  if (kirim && !clean(body.alamat)) fail('Alamat wajib diisi jika kirim barang aktif.');
-  if (kirim && !clean(body.kelurahan)) fail('Kelurahan wajib diisi jika kirim barang aktif.');
-  if (kirim && !clean(body.kecamatan)) fail('Kecamatan wajib diisi jika kirim barang aktif.');
-  if (kirim && !clean(body.wilayah)) fail('Wilayah wajib diisi jika kirim barang aktif.');
-  if (kirim && !clean(body.kota)) fail('Kota wajib diisi jika kirim barang aktif.');
-  if (kirim && !clean(body.kodepos)) fail('Kode pos wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.namakirim))
+    fail('Nama kirim wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.alamat))
+    fail('Alamat wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.kelurahan))
+    fail('Kelurahan wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.kecamatan))
+    fail('Kecamatan wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.wilayah))
+    fail('Wilayah wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.kota))
+    fail('Kota wajib diisi jika kirim barang aktif.');
+  if (kirim && !clean(body.kodepos))
+    fail('Kode pos wajib diisi jika kirim barang aktif.');
 
   const payments = Array.isArray(body.payments) ? body.payments : [];
   if (!payments.length) fail('Minimal satu pembayaran harus diisi.');
@@ -70,10 +86,12 @@ function validateCreateBody(body) {
   const cleanedPayments = payments.map((p, i) => {
     const paytype = clean(p.paytype);
     if (!paytype) fail(`Baris pembayaran ${i + 1}: paytype wajib dipilih.`);
-    if (seenPaytype.has(paytype)) fail(`Paytype ${paytype} tidak boleh dimasukkan dua kali.`);
+    if (seenPaytype.has(paytype))
+      fail(`Paytype ${paytype} tidak boleh dimasukkan dua kali.`);
     seenPaytype.add(paytype);
     const amount = parseMoney(p.amount, `Amount pembayaran baris ${i + 1}`);
-    if (Number(amount) <= 0) fail(`Amount pembayaran baris ${i + 1} harus lebih besar dari 0.`);
+    if (Number(amount) <= 0)
+      fail(`Amount pembayaran baris ${i + 1} harus lebih besar dari 0.`);
     return { paytype, amount, catatan: clean(p.catatan) };
   });
 
@@ -102,18 +120,26 @@ async function create(body, actor) {
   try {
     await client.query('BEGIN');
 
-    const locked = await repo.lockAndGetSelectedTransactions(client, input.ordernos);
+    const locked = await repo.lockAndGetSelectedTransactions(
+      client,
+      input.ordernos
+    );
     if (locked.rowCount !== input.ordernos.length) {
       fail('Salah satu transaksi PIN tidak ditemukan.', 409);
     }
 
     const alreadyProcessed = locked.rows.find((r) => r.stbayar === true);
     if (alreadyProcessed) {
-      fail(`Transaksi ${alreadyProcessed.orderno} sudah diproses sebelumnya.`, 409);
+      fail(
+        `Transaksi ${alreadyProcessed.orderno} sudah diproses sebelumnya.`,
+        409
+      );
     }
 
     const totalBarang = await repo.calculateGoodsTotal(client, input.ordernos);
-    const totalTagihan = (Number(totalBarang) + Number(input.ongkir)).toFixed(2);
+    const totalTagihan = (Number(totalBarang) + Number(input.ongkir)).toFixed(
+      2
+    );
 
     const paytypeList = input.payments.map((p) => p.paytype);
     const paymentTypes = await repo.validatePaymentTypes(client, paytypeList);
@@ -161,7 +187,10 @@ async function create(body, actor) {
     );
 
     if (marked.rowCount !== input.ordernos.length) {
-      fail('Sebagian transaksi sudah diproses user lain. Transaksi dibatalkan.', 409);
+      fail(
+        'Sebagian transaksi sudah diproses user lain. Transaksi dibatalkan.',
+        409
+      );
     }
 
     await client.query('COMMIT');

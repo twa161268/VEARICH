@@ -119,6 +119,7 @@ exports.login = async (req, res) => {
     req.session.user = username;
     req.session.stkid = user.stkid;
     req.session.role = user.role;
+    req.session.stkid = user.stkid;
 
     req.session.param = {
       pricecode: param.pricecode,
@@ -151,5 +152,3 @@ exports.logout = (req, res) => {
     res.redirect('/');
   });
 };
-
-

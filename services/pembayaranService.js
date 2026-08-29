@@ -122,8 +122,10 @@ async function create(body, actor) {
 
     const locked = await repo.lockAndGetSelectedTransactions(
       client,
-      input.ordernos
+      input.ordernos,
+      actor.stkid
     );
+
     if (locked.rowCount !== input.ordernos.length) {
       fail('Salah satu transaksi PIN tidak ditemukan.', 409);
     }
@@ -136,8 +138,15 @@ async function create(body, actor) {
       );
     }
 
-    const totalBarang = await repo.calculateGoodsTotal(client, input.ordernos);
-    const totalTagihan = (Number(totalBarang) + Number(input.ongkir)).toFixed(
+    //const totalBarang = await repo.calculateGoodsTotal(client, input.ordernos);
+    //const totalTagihan = (Number(totalBarang) + Number(input.ongkir)).toFixed(
+    //  2
+    //);
+
+    const totals = await repo.calculateGoodsTotal(client, input.ordernos);
+    const totalAmount = totals.total_amount;
+    const totalPin = totals.total_pin;
+    const totalTagihan = (Number(totalAmount) + Number(input.ongkir)).toFixed(
       2
     );
 
@@ -165,6 +174,8 @@ async function create(body, actor) {
       ongkir: input.ongkir,
       stkid: actor.stkid,
       username: actor.username,
+      tamount: totalAmount,
+      tpin: totalPin,
     });
 
     for (const payment of input.payments) {
@@ -183,7 +194,8 @@ async function create(body, actor) {
       client,
       input.ordernos,
       registerno,
-      actor.username
+      actor.username,
+      actor.stkid
     );
 
     if (marked.rowCount !== input.ordernos.length) {
@@ -194,7 +206,7 @@ async function create(body, actor) {
     }
 
     await client.query('COMMIT');
-    return await getDetail(registerno);
+    return await getDetail(registerno, actor.stkid);
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -203,20 +215,21 @@ async function create(body, actor) {
   }
 }
 
-async function getDetail(registerno) {
+async function getDetail(registerno, stkid) {
   const client = await db.pool.connect();
+
   try {
-    return await repo.getRegister(client, registerno);
+    return await repo.getRegister(client, registerno, stkid);
   } finally {
     client.release();
   }
 }
 
-async function remove(registerno) {
+async function remove(registerno, stkid) {
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
-    const existing = await repo.getRegister(client, registerno);
+    const existing = await repo.getRegister(client, registerno, stkid);
     if (!existing) fail('Register tidak ditemukan.', 404);
     await repo.deleteRegister(client, registerno);
     await client.query('COMMIT');

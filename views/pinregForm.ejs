@@ -69,15 +69,17 @@
                 <label class="form-label fw-semibold">Nama Sponsor</label
                 ><input id="namasp" maxlength="50" class="form-control" />
               </div>
+
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Stockist ID</label
-                ><input
-                  id="stkid"
-                  maxlength="10"
-                  class="form-control"
-                  placeholder="Opsional"
-                />
+                <label class="form-label fw-semibold">Stockist ID</label>
+                <div class="form-control bg-light">
+                  <strong><%= stkid || '-' %></strong>
+                </div>
+                <small class="text-muted">
+                  Stockist sesuai yang sedang login.
+                </small>
               </div>
+
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Register No</label>
 

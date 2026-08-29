@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrasi Member - <%= data.header.registerno %></title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+  <link rel="stylesheet" href="/css/register.css" />
+</head>
+<body class="bg-light">
+  <div class="container-fluid px-3 px-lg-4 py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <div>
+        <div class="reg-eyebrow">MEMBER REGISTRATION</div>
+        <h2 class="fw-bold mb-1">Registrasi Member</h2>
+        <div class="text-secondary">
+          Register No: <strong><%= data.header.registerno %></strong>
+        </div>
+      </div>
+      <a href="/register" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Kembali
+      </a>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-4">
+        <div class="reg-stat">
+          <span>Register No</span>
+          <strong><%= data.header.registerno %></strong>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="reg-stat">
+          <span>Jml PIN</span>
+          <strong id="pinBought"><%= Number(data.header.tpin || 0).toLocaleString('id-ID') %></strong>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="reg-stat">
+          <span>Pricecode</span>
+          <strong><%= pricecode || '-' %></strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm reg-card mb-3">
+      <div class="card-header bg-white border-0 p-3 p-lg-4">
+        <h5 class="fw-bold mb-1">Registrasi Member yang Sudah Ada</h5>
+        <small class="text-secondary">
+          Data existing hanya ditampilkan sebagai referensi.
+        </small>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>USERNAME</th>
+              <th>USERNAMESP</th>
+              <th>PRDID</th>
+              <th>JML.PIN</th>
+              <th>KETERANGAN</th>
+              <th>PIN SISA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (data.registrations.length) { %>
+              <% data.registrations.forEach(r => { %>
+                <tr>
+                  <td><strong><%= r.username %></strong></td>
+                  <td><%= r.usernamesp || '-' %></td>
+                  <td><%= r.prdid %><%= r.prdname ? ' - ' + r.prdname : '' %></td>
+                  <td class="text-end"><%= Number(r.pin_terpakai || 0).toLocaleString('id-ID') %></td>
+                  <td><%= r.keterangan || '-' %></td>
+                  <td class="text-end"><%= Number(r.pin_sisa || 0).toLocaleString('id-ID') %></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" class="text-center py-4 text-secondary">
+                  Belum ada member yang diregistrasikan.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <form id="registerForm">
+      <div class="card border-0 shadow-sm reg-card">
+        <div class="card-header bg-white border-0 p-3 p-lg-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <h5 class="fw-bold mb-1">Tambah Register Member Baru</h5>
+            <small class="text-secondary">
+              Jml.Pin otomatis dari <strong>pricetab.pin</strong>.
+            </small>
+          </div>
+          <button type="button" id="btnTambah" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Tambah Register Member
+          </button>
+        </div>
+
+        <div class="card-body p-2 p-lg-3">
+          <div id="detailRows"></div>
+        </div>
+
+        <div class="px-3 pb-3">
+          <div class="reg-total-box">
+            <div>
+              <small>PIN Dibeli</small>
+              <strong id="totalBought"><%= Number(data.header.tpin || 0).toLocaleString('id-ID') %></strong>
+            </div>
+            <div>
+              <small>Total PIN</small>
+              <strong id="totalUsed">0</strong>
+            </div>
+            <div>
+              <small>Sisa PIN</small>
+              <strong id="totalRemain">0</strong>
+            </div>
+          </div>
+          <div id="statusBox" class="alert alert-secondary mt-3 mb-0">
+            Tambahkan member baru untuk melakukan registrasi.
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <a href="/register/form/<%= encodeURIComponent(data.header.registerno) %>"
+           class="btn btn-outline-secondary">Batal</a>
+        <button id="btnSimpan" type="submit" class="btn btn-primary px-4">
+          <i class="bi bi-check2-circle me-1"></i>Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="regToast" class="toast">
+      <div class="toast-body"></div>
+    </div>
+  </div>
+
+  <script>
+    window.REGISTER_DATA = <%- JSON.stringify({
+      registerno: data.header.registerno,
+      tpin: Number(data.header.tpin || 0),
+      pinUsed: Number(data.header.pin_terpakai || 0)
+    }) %>;
+    window.REGISTER_PRICECODE = <%- JSON.stringify(pricecode || '') %>;
+  </script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/registerForm.js"></script>
+</body>
+</html>

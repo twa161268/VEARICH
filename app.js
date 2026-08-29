@@ -14,6 +14,7 @@ const mloginRoutes = require('./routes/mloginRoutes');
 const reffnilaiRoutes = require('./routes/reffnilaiRoutes');
 const pinregRoutes = require('./routes/pinregRoutes');
 const pembayaranRoutes = require('./routes/pembayaranRoutes');
+const registerRoutes = require('./routes/registerRoutes');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./db');
@@ -88,6 +89,7 @@ app.use('/simpan', simpanRoutes);
 app.use('/report', reportRoutes);
 app.use('/mlogin', mloginRoutes);
 app.use('/reffnilai', reffnilaiRoutes);
+app.use('/register', registerRoutes);
 app.use('/', authRoutes);
 
 const PORT = process.env.PORT || 3000;

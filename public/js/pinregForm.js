@@ -114,9 +114,11 @@ async function init() {
       '/pinreg/load/' + encodeURIComponent(window.PINREG_ORDERNO)
     );
     const h = x.data.header;
-    ['nama', 'nohp', 'usernamesp', 'namasp', 'stkid', 'registerno'].forEach(
+
+    ['nama', 'nohp', 'usernamesp', 'namasp', 'registerno'].forEach(
       (n) => ($(n).value = h[n] || '')
     );
+
     S.rows = x.data.details.map((d) => ({
       prdid: d.prdid,
       qty: Number(d.qty || 1),
@@ -136,9 +138,11 @@ $('pinregForm').addEventListener('submit', async (e) => {
     nohp: $('nohp').value.trim(),
     usernamesp: $('usernamesp').value.trim(),
     namasp: $('namasp').value.trim(),
-    stkid: $('stkid').value.trim(),
     registerno: $('registerno').value.trim(),
-    details: S.rows.map((r) => ({ prdid: r.prdid, qty: r.qty })),
+    details: S.rows.map((r) => ({
+      prdid: r.prdid,
+      qty: r.qty,
+    })),
   };
   if (!body.nama) return alert('Nama wajib diisi.');
   if (S.rows.some((r) => !r.prdid || !Number.isInteger(r.qty) || r.qty <= 0))

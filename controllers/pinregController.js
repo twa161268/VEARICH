@@ -25,9 +25,12 @@ exports.page = (req, res) => {
 
 exports.form = (req, res) => {
   const pricecode = req.session.param.pricecode;
+  const stkid = req.session.stkid;
+
   res.render('pinregForm', {
     user: req.session.user || null,
-    pricecode: pricecode,
+    pricecode,
+    stkid,
     edit: Boolean(req.params.orderno),
     orderno: req.params.orderno || '',
   });
@@ -37,24 +40,49 @@ exports.load = async (req, res, next) => {
   try {
     const page = Math.max(Number(req.query.page || 1), 1);
     const limit = Math.min(Math.max(Number(req.query.limit || 20), 1), 100);
+
+    const stkid = req.session.stkid;
+
     const data = await service.list({
+      stkid,
       search: req.query.search || '',
       page,
       limit,
     });
+
     res.json({ success: true, data });
   } catch (err) {
     next(err);
   }
 };
 
+//exports.loadByOrderNo = async (req, res, next) => {
+//  try {
+//    const data = await service.getByOrderNo(req.params.orderno);
+//   if (!data)
+//      return res
+//        .status(404)
+//        .json({ success: false, msg: 'Transaksi tidak ditemukan!' });
+//    res.json({ success: true, data });
+//  } catch (err) {
+//    next(err);
+//  }
+//};
+
 exports.loadByOrderNo = async (req, res, next) => {
   try {
-    const data = await service.getByOrderNo(req.params.orderno);
-    if (!data)
-      return res
-        .status(404)
-        .json({ success: false, msg: 'Transaksi tidak ditemukan!' });
+    const data = await service.getByOrderNo(
+      req.params.orderno,
+      req.session.stkid
+    );
+
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        msg: 'Transaksi tidak ditemukan!',
+      });
+    }
+
     res.json({ success: true, data });
   } catch (err) {
     next(err);
@@ -113,10 +141,23 @@ exports.update = async (req, res, next) => {
   }
 };
 
+//exports.remove = async (req, res, next) => {
+//  try {
+//    await service.remove(req.params.orderno);
+//    res.json({ success: true, msg: 'Transaksi berhasil dihapus!' });
+//  } catch (err) {
+//    next(err);
+//  }
+//};
+
 exports.remove = async (req, res, next) => {
   try {
-    await service.remove(req.params.orderno);
-    res.json({ success: true, msg: 'Transaksi berhasil dihapus!' });
+    await service.remove(req.params.orderno, req.session.stkid);
+
+    res.json({
+      success: true,
+      msg: 'Transaksi berhasil dihapus!',
+    });
   } catch (err) {
     next(err);
   }

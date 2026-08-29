@@ -65,7 +65,7 @@ async function nextTransId(client) {
   return Number(result.rows[0].max_id) + 1;
 }
 
-async function insertDetail(client, orderno, detail) {
+async function insertDetail(client, orderno, detail, pricecode) {
   const price = await repo.getPrice(client, detail.prdid, pricecode);
   if (!price) {
     const err = new Error(
@@ -118,16 +118,16 @@ async function create(body, actor) {
         orderno,
         actor.username,
         null, // karena registerno belum dibuatkan, nanti saja pas update
-        body.stkid || actor.stkid || null,
+        actor.stkid, //body.stkid || actor.stkid || null,
       ]
     );
 
     for (const detail of body.details) {
-      await insertDetail(client, orderno, detail);
+      await insertDetail(client, orderno, detail, actor.pricecode);
     }
 
     await client.query('COMMIT');
-    return getByOrderNo(orderno);
+    return getByOrderNo(orderno, actor.stkid);
   } catch (err) {
     await client.query('ROLLBACK');
     if (err.code === '23505') {
@@ -148,7 +148,10 @@ async function update(orderno, body, actor) {
   try {
     await client.query('BEGIN');
 
-    const existing = await repo.findByOrderNo(client, orderno);
+    //const existing = await repo.findByOrderNo(client, orderno);
+
+    const existing = await repo.findByOrderNo(client, orderno, actor.stkid);
+
     if (!existing) {
       const err = new Error('Transaksi tidak ditemukan.');
       err.status = 404;
@@ -157,11 +160,17 @@ async function update(orderno, body, actor) {
 
     await client.query(
       `
-      UPDATE tr_pinreg
-      SET nama=$2, nohp=$3, usernamesp=$4, namasp=$5,
-          registerno=$6, stkid=$7, updatedt=NOW(), updatenm=$8
-      WHERE orderno=$1
-    `,
+  UPDATE tr_pinreg
+  SET nama=$2,
+      nohp=$3,
+      usernamesp=$4,
+      namasp=$5,
+      registerno=$6,
+      updatedt=NOW(),
+      updatenm=$7
+  WHERE orderno=$1
+    AND stkid=$8
+`,
       [
         orderno,
         String(body.nama).trim(),
@@ -169,17 +178,17 @@ async function update(orderno, body, actor) {
         body.usernamesp || null,
         body.namasp || null,
         body.registerno || null,
-        body.stkid || actor.stkid || null,
         actor.username,
+        actor.stkid,
       ]
     );
 
     await client.query('DELETE FROM tr_pinregdet WHERE orderno=$1', [orderno]);
     for (const detail of body.details)
-      await insertDetail(client, orderno, detail);
+      await insertDetail(client, orderno, detail, actor.pricecode);
 
     await client.query('COMMIT');
-    return getByOrderNo(orderno);
+    return getByOrderNo(orderno, actor.stkid);
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -188,27 +197,46 @@ async function update(orderno, body, actor) {
   }
 }
 
-async function getByOrderNo(orderno) {
+async function getByOrderNo(orderno, stkid) {
   const client = await db.pool.connect();
   try {
-    return await repo.findByOrderNo(client, orderno);
+    return await repo.findByOrderNo(client, orderno, stkid);
   } finally {
     client.release();
   }
 }
 
-async function remove(orderno) {
+async function remove(orderno, stkid) {
   const client = await db.pool.connect();
+
   try {
     await client.query('BEGIN');
-    const existing = await repo.findByOrderNo(client, orderno);
+
+    const existing = await repo.findByOrderNo(client, orderno, stkid);
+
     if (!existing) {
       const err = new Error('Transaksi tidak ditemukan.');
       err.status = 404;
       throw err;
     }
-    await client.query('DELETE FROM tr_pinregdet WHERE orderno=$1', [orderno]);
-    await client.query('DELETE FROM tr_pinreg WHERE orderno=$1', [orderno]);
+
+    await client.query(
+      `
+      DELETE FROM tr_pinregdet
+      WHERE orderno=$1
+      `,
+      [orderno]
+    );
+
+    await client.query(
+      `
+      DELETE FROM tr_pinreg
+      WHERE orderno=$1
+        AND stkid=$2
+      `,
+      [orderno, stkid]
+    );
+
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');

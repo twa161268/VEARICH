@@ -1,6 +1,6 @@
 const db = require('../db');
 
-async function listRegisters({ search = '', page = 1, limit = 20 }) {
+async function listRegisters({ stkid, search = '', page = 1, limit = 20 }) {
   const offset = (page - 1) * limit;
   const q = `%${String(search).trim()}%`;
 
@@ -20,32 +20,33 @@ async function listRegisters({ search = '', page = 1, limit = 20 }) {
       k.ongkir,
       k.createdt
     FROM public.tr_kirim k
-    WHERE k.registerno ILIKE $1
-       OR COALESCE(k.namakirim, '') ILIKE $1
-       OR COALESCE(k.kota, '') ILIKE $1
-       OR COALESCE(k.alamat, '') ILIKE $1
+    WHERE k.stkid = $1
+      AND (k.registerno ILIKE $2
+       OR COALESCE(k.namakirim, '') ILIKE $2
+       OR COALESCE(k.kota, '') ILIKE $2
+       OR COALESCE(k.alamat, '') ILIKE $2)
     ORDER BY k.createdt DESC NULLS LAST, k.registerno DESC
-    LIMIT $2 OFFSET $3
+    LIMIT $3 OFFSET $4
     `,
-    [q, limit, offset]
+    [stkid, q, limit, offset]
   );
 
   const count = await db.query(
     `
     SELECT COUNT(*)::int AS total
     FROM public.tr_kirim k
-    WHERE k.registerno ILIKE $1
-       OR COALESCE(k.namakirim, '') ILIKE $1
-       OR COALESCE(k.kota, '') ILIKE $1
-       OR COALESCE(k.alamat, '') ILIKE $1
+    WHERE k.stkid=$1 AND (k.registerno ILIKE $2
+       OR COALESCE(k.namakirim, '') ILIKE $2
+       OR COALESCE(k.kota, '') ILIKE $2
+       OR COALESCE(k.alamat, '') ILIKE $2)
     `,
-    [q]
+    [stkid, q]
   );
 
   return { rows, total: count[0]?.total || 0, page, limit };
 }
 
-async function getRegister(client, registerno) {
+async function getRegister(client, registerno, stkid) {
   const header = await client.query(
     `
     SELECT
@@ -53,9 +54,9 @@ async function getRegister(client, registerno) {
       kodepos, bayar, ongkir, stkid, createdt, updatedt, createnm,
       updatenm, namakirim
     FROM public.tr_kirim
-    WHERE registerno = $1
+    WHERE registerno = $1 AND stkid = $2
     `,
-    [registerno]
+    [registerno, stkid]
   );
 
   if (!header.rows[0]) return null;
@@ -73,11 +74,11 @@ async function getRegister(client, registerno) {
       COALESCE(SUM(d.qty * d.bv), 0)::numeric(18,2) AS total_bv
     FROM public.tr_pinreg r
     LEFT JOIN public.tr_pinregdet d ON d.orderno = r.orderno
-    WHERE r.registerno = $1
+    WHERE r.registerno = $1 and r.stkid = $2
     GROUP BY r.orderno, r.nama, r.usernamesp, r.createdt, r.stbayar
     ORDER BY r.createdt DESC NULLS LAST, r.orderno DESC
     `,
-    [registerno]
+    [registerno, stkid]
   );
 
   const payments = await client.query(
@@ -103,7 +104,10 @@ async function getRegister(client, registerno) {
   };
 }
 
-async function listUnpaidTransactions({ search = '', page = 1, limit = 20 }) {
+async function listUnpaidTransactions(
+  stkid,
+  { search = '', page = 1, limit = 20 }
+) {
   const offset = (page - 1) * limit;
   const q = `%${String(search).trim()}%`;
 
@@ -120,27 +124,29 @@ async function listUnpaidTransactions({ search = '', page = 1, limit = 20 }) {
       COALESCE(SUM(d.qty * d.bv), 0)::numeric(18,2) AS total_bv
     FROM public.tr_pinreg r
     LEFT JOIN public.tr_pinregdet d ON d.orderno = r.orderno
-    WHERE r.stbayar = false
-      AND (r.orderno ILIKE $1
-       OR COALESCE(r.nama, '') ILIKE $1
-       OR COALESCE(r.usernamesp, '') ILIKE $1)
+    WHERE r.stkid = $1 AND r.stbayar = false
+    AND (
+      r.orderno ILIKE $2
+       OR COALESCE(r.nama, '') ILIKE $2
+       OR COALESCE(r.usernamesp, '') ILIKE $2
+       )
     GROUP BY r.orderno, r.nama, r.usernamesp, r.createdt, r.stbayar
     ORDER BY r.createdt DESC NULLS LAST, r.orderno DESC
-    LIMIT $2 OFFSET $3
+    LIMIT $3 OFFSET $4
     `,
-    [q, limit, offset]
+    [stkid, q, limit, offset]
   );
 
   const count = await db.query(
     `
     SELECT COUNT(*)::int AS total
     FROM public.tr_pinreg r
-    WHERE r.stbayar = false
-      AND (r.orderno ILIKE $1
-       OR COALESCE(r.nama, '') ILIKE $1
-       OR COALESCE(r.usernamesp, '') ILIKE $1)
+    WHERE r.stkid = $1 AND r.stbayar = false
+      AND (r.orderno ILIKE $2
+       OR COALESCE(r.nama, '') ILIKE $2
+       OR COALESCE(r.usernamesp, '') ILIKE $2)
     `,
-    [q]
+    [stkid, q]
   );
 
   return { rows, total: count[0]?.total || 0, page, limit };
@@ -177,29 +183,47 @@ async function generateRegisterNo(client) {
   return `R${yy}${String(next).padStart(5, '0')}`;
 }
 
-async function lockAndGetSelectedTransactions(client, ordernos) {
+async function lockAndGetSelectedTransactions(client, ordernos, stkid) {
   return client.query(
     `
     SELECT orderno, nama, stbayar, registerno
     FROM public.tr_pinreg
-    WHERE orderno = ANY($1::varchar[])
+    WHERE orderno = ANY($1::varchar[]) AND stkid = $2
     ORDER BY orderno
     FOR UPDATE
     `,
-    [ordernos]
+    [ordernos, stkid]
   );
 }
+
+//async function calculateGoodsTotal(client, ordernos) {
+//  const result = await client.query(
+//    `
+//    SELECT COALESCE(SUM(d.qty * d.dp), 0)::numeric(18,2) AS total_barang
+//    FROM public.tr_pinregdet d
+//    WHERE d.orderno = ANY($1::varchar[])
+//    `,
+//    [ordernos]
+//  );
+//  return result.rows[0]?.total_barang || '0.00';
+//}
 
 async function calculateGoodsTotal(client, ordernos) {
   const result = await client.query(
     `
-    SELECT COALESCE(SUM(d.qty * d.dp), 0)::numeric(18,2) AS total_barang
+    SELECT
+      COALESCE(SUM(d.qty * d.dp), 0)::numeric(18,2) AS total_amount,
+      COALESCE(SUM(d.qty * d.pin), 0)::integer AS total_pin
     FROM public.tr_pinregdet d
     WHERE d.orderno = ANY($1::varchar[])
     `,
     [ordernos]
   );
-  return result.rows[0]?.total_barang || '0.00';
+
+  return {
+    total_amount: result.rows[0]?.total_amount || '0.00',
+    total_pin: result.rows[0]?.total_pin || 0,
+  };
 }
 
 async function validatePaymentTypes(client, paytypes) {
@@ -219,10 +243,10 @@ async function insertRegister(client, data) {
     INSERT INTO public.tr_kirim
       (registerno, kirim, alamat, kelurahan, kecamatan, wilayah, kota,
        kodepos, bayar, ongkir, stkid, createdt, updatedt, createnm,
-       updatenm, namakirim)
+       updatenm, namakirim, tamount, tpin)
     VALUES
       ($1, $2, $3, $4, $5, $6, $7,
-       $8, $9::numeric, $10::numeric, $11, NOW(), NOW(), $12, $12, $13)
+       $8, $9::numeric, $10::numeric, $11, NOW(), NOW(), $12, $12, $13,$14,$15::integer)
     RETURNING *
     `,
     [
@@ -239,6 +263,8 @@ async function insertRegister(client, data) {
       data.stkid,
       data.username,
       data.namakirim,
+      data.tamount,
+      data.tpin,
     ]
   );
   return result.rows[0];
@@ -266,27 +292,33 @@ async function paymentTotal(client, registerno) {
   return result.rows[0]?.total_bayar || '0.00';
 }
 
-async function markTransactionsPaid(client, ordernos, registerno, username) {
+async function markTransactionsPaid(
+  client,
+  ordernos,
+  registerno,
+  username,
+  stkid
+) {
   return client.query(
     `
     UPDATE public.tr_pinreg
-    SET stbayar = true,
-        registerno = $1,
-        updatedt = NOW(),
-        updatenm = $2
-    WHERE orderno = ANY($3::varchar[])
-      AND stbayar = false
-    RETURNING orderno
+SET stbayar = true,
+    registerno = $1,
+    updatedt = NOW(),
+    updatenm = $2
+WHERE orderno = ANY($3::varchar[])
+  AND stkid = $4
+  AND stbayar = false
+RETURNING orderno
     `,
-    [registerno, username, ordernos]
+    [registerno, username, ordernos, stkid]
   );
 }
 
 async function deleteRegister(client, registerno) {
-  await client.query(
-    `DELETE FROM public.tr_bayar WHERE registerno = $1`,
-    [registerno]
-  );
+  await client.query(`DELETE FROM public.tr_bayar WHERE registerno = $1`, [
+    registerno,
+  ]);
 
   await client.query(
     `
@@ -294,13 +326,14 @@ async function deleteRegister(client, registerno) {
     SET stbayar = false,
         registerno = NULL
     WHERE registerno = $1
+      AND stkid = $2
     `,
-    [registerno]
+    [registerno, stkid]
   );
 
   const result = await client.query(
-    `DELETE FROM public.tr_kirim WHERE registerno = $1 RETURNING registerno`,
-    [registerno]
+    `DELETE FROM public.tr_kirim WHERE registerno = $1 AND stkid = $2 RETURNING registerno`,
+    [registerno, stkid]
   );
 
   return result.rowCount;

@@ -4,14 +4,10 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-const nilaiRoutes = require('./routes/nilaiRoutes');
-const nilaiidkRoutes = require('./routes/nilaiidkRoutes');
 const stokistRoutes = require('./routes/stokistRoutes');
-const simpanRoutes = require('./routes/simpanRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const authRoutes = require('./routes/authRoutes');
 const mloginRoutes = require('./routes/mloginRoutes');
-const reffnilaiRoutes = require('./routes/reffnilaiRoutes');
 const pinregRoutes = require('./routes/pinregRoutes');
 const pembayaranRoutes = require('./routes/pembayaranRoutes');
 const registerRoutes = require('./routes/registerRoutes');
@@ -74,21 +70,16 @@ app.get('/', (req, res) => {
 //-----------------------------------------------
 
 // ROUTE HALAMAN DASHBOARD (penilaian.ejs)
-app.get('/penilaian', (req, res) => {
-  res.render('penilaian');
-});
+//app.get('/penilaian', (req, res) => {
+//  res.render('penilaian');
+//});
 
 // API ROUTES
-app.use('/nilai', nilaiRoutes);
 app.use('/stokist', stokistRoutes);
 app.use('/pinreg', pinregRoutes);
 app.use('/pembayaran', pembayaranRoutes);
-//app.use("/refnilai", refnilaiRoutes);
-app.use('/nilaiidk', nilaiidkRoutes);
-app.use('/simpan', simpanRoutes);
 app.use('/report', reportRoutes);
 app.use('/mlogin', mloginRoutes);
-app.use('/reffnilai', reffnilaiRoutes);
 app.use('/register', registerRoutes);
 app.use('/', authRoutes);
 

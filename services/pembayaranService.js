@@ -231,7 +231,7 @@ async function remove(registerno, stkid) {
     await client.query('BEGIN');
     const existing = await repo.getRegister(client, registerno, stkid);
     if (!existing) fail('Register tidak ditemukan.', 404);
-    await repo.deleteRegister(client, registerno);
+    await repo.deleteRegister(client, registerno, stkid);
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');

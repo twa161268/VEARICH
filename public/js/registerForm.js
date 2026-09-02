@@ -9,13 +9,17 @@ const state = {
 };
 
 const esc = (v) =>
-  String(v ?? '').replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  })[c]);
+  String(v ?? '').replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      })[c]
+  );
 
 const number = (v) => Number(v || 0).toLocaleString('id-ID');
 
@@ -30,8 +34,7 @@ async function api(url, options = {}) {
 
   const json = await res.json();
 
-  if (!res.ok || !json.success)
-    throw new Error(json.msg || 'Request gagal.');
+  if (!res.ok || !json.success) throw new Error(json.msg || 'Request gagal.');
 
   return json;
 }
@@ -39,12 +42,16 @@ async function api(url, options = {}) {
 function productOptions(selected) {
   return `
     <option value="">Pilih produk...</option>
-    ${state.products.map((p) => `
+    ${state.products
+      .map(
+        (p) => `
       <option value="${esc(p.prdid)}"
               ${p.prdid === selected ? 'selected' : ''}>
         ${esc(p.prdid)} — ${esc(p.prdname || '')} (${number(p.pin)} PIN)
       </option>
-    `).join('')}
+    `
+      )
+      .join('')}
   `;
 }
 
@@ -78,7 +85,9 @@ function render() {
     return;
   }
 
-  box.innerHTML = state.rows.map((r, i) => `
+  box.innerHTML = state.rows
+    .map(
+      (r, i) => `
     <div class="reg-detail">
       <div class="row g-2 align-items-end">
         <div class="col-xl-2 col-md-6">
@@ -90,7 +99,7 @@ function render() {
         </div>
 
         <div class="col-xl-2 col-md-6">
-          <label class="form-label small fw-semibold">USERNAMESP</label>
+          <label class="form-label small fw-semibold">USERNAME SPONSOR</label>
           <input class="form-control form-control-sm"
                  maxlength="30"
                  value="${esc(r.usernamesp)}"
@@ -98,7 +107,7 @@ function render() {
         </div>
 
         <div class="col-xl-3 col-md-6">
-          <label class="form-label small fw-semibold">PRDID *</label>
+          <label class="form-label small fw-semibold">PRODUK *</label>
           <select class="form-select form-select-sm"
                   onchange="pickProduct(${i}, this.value)">
             ${productOptions(r.prdid)}
@@ -129,7 +138,9 @@ function render() {
         </div>
       </div>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
   calc();
 }
@@ -190,8 +201,7 @@ function calc() {
       `sedangkan tambahan registrasi membutuhkan ${number(newUsed)} PIN.`;
   } else {
     box.className = 'alert alert-success mt-3 mb-0';
-    box.textContent =
-      `PIN mencukupi. Setelah disimpan, sisa PIN menjadi ${number(remain)}.`;
+    box.textContent = `PIN mencukupi. Setelah disimpan, sisa PIN menjadi ${number(remain)}.`;
   }
 }
 
@@ -204,8 +214,7 @@ $('btnTambah').onclick = () => addRow();
 $('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  if (!state.rows.length)
-    return alert('Tambahkan minimal satu member.');
+  if (!state.rows.length) return alert('Tambahkan minimal satu member.');
 
   for (let i = 0; i < state.rows.length; i++) {
     const r = state.rows[i];
@@ -213,8 +222,7 @@ $('registerForm').addEventListener('submit', async (e) => {
     if (!r.username.trim())
       return alert(`Baris ${i + 1}: username wajib diisi.`);
 
-    if (!r.prdid)
-      return alert(`Baris ${i + 1}: produk wajib dipilih.`);
+    if (!r.prdid) return alert(`Baris ${i + 1}: produk wajib dipilih.`);
   }
 
   const duplicate = new Set();
@@ -250,8 +258,7 @@ $('registerForm').addEventListener('submit', async (e) => {
     );
 
     alert(j.msg || 'Registrasi berhasil disimpan.');
-    location.href =
-      `/register/form/${encodeURIComponent(DATA.registerno)}`;
+    location.href = `/register/form/${encodeURIComponent(DATA.registerno)}`;
   } catch (err) {
     alert(err.message);
   } finally {

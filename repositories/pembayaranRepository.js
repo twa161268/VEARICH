@@ -104,10 +104,12 @@ async function getRegister(client, registerno, stkid) {
   };
 }
 
-async function listUnpaidTransactions(
+async function listUnpaidTransactions({
   stkid,
-  { search = '', page = 1, limit = 20 }
-) {
+  search = '',
+  page = 1,
+  limit = 20,
+}) {
   const offset = (page - 1) * limit;
   const q = `%${String(search).trim()}%`;
 

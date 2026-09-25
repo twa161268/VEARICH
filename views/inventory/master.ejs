@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Master Inventory</title><link rel="stylesheet" href="/css/bootstrap.min.css"><link rel="stylesheet" href="/icons/bootstrap-icons.css"><link rel="stylesheet" href="/css/inventory.css"></head>
+<body>
+<div id="inventoryContext"></div><div class="container-fluid p-3 p-lg-4">
+<div class="d-flex justify-content-between align-items-center mb-4"><div><div class="eyebrow">INVENTORY MASTER</div><h2 id="title" class="fw-bold mb-1">Master</h2><div class="text-secondary">Kelola data master inventory.</div></div><a href="/inventory" class="btn btn-outline-secondary">← Inventory</a></div>
+<div class="card border-0 shadow-sm"><div class="card-body">
+<div class="d-flex justify-content-between gap-2 mb-3"><input id="search" class="form-control" style="max-width:360px" placeholder="Cari..."><button id="add" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah</button></div>
+<div class="table-responsive"><table class="table table-hover align-middle"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+</div></div></div>
+<div class="modal fade" id="modal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 id="modalTitle">Data</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="form"><div id="fields" class="row g-3"></div></form></div><div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" id="save">Simpan</button></div></div></div></div>
+<script>window.INV_MASTER_TYPE='<%= type %>';</script><script src="/js/bootstrap.bundle.min.js"></script><script src="/js/inventory-master.js"></script>
+<script src="/js/inventory-context.js"></script></body></html>

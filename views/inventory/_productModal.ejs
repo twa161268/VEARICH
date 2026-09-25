@@ -1,0 +1,78 @@
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">MASTER PRODUK</div>
+          <h5 class="modal-title fw-bold" id="productModalTitle">Tambah Produk</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <form id="productForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="productMode" value="create">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Kode Produk <span class="text-danger">*</span></label>
+              <input id="prdid" class="form-control" maxlength="10" required>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+              <input id="prdname" class="form-control" maxlength="30" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Kategori <span class="text-danger">*</span></label>
+              <select id="kode" class="form-select" required></select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Barcode</label>
+              <input id="barcode" class="form-control" maxlength="50">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Satuan <span class="text-danger">*</span></label>
+              <select id="satuan_id" class="form-select" required></select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Stok Minimum <span class="text-danger">*</span></label>
+              <input id="stok_minimum" class="form-control" type="number" min="0" step="0.001" value="0" required>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <div class="form-check form-switch mb-2">
+                <input id="status" class="form-check-input" type="checkbox" checked>
+                <label class="form-check-label" for="status">Aktif</label>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <div class="form-check form-switch mb-2">
+                <input id="stock_managed" class="form-check-input" type="checkbox" checked>
+                <label class="form-check-label" for="stock_managed">Kelola Stok Inventory</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="product-price-section mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2 gap-2 flex-wrap">
+              <div>
+                <h6 class="fw-bold mb-0">Harga / Pricecode</h6>
+                <small class="text-secondary">Satu produk dapat memiliki beberapa pricecode.</small>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="addPriceRow">+ Tambah Pricecode</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead><tr><th style="width:18%">Pricecode</th><th>DP</th><th>BV</th><th>PIN</th><th style="width:70px"></th></tr></thead>
+                <tbody id="priceRows"></tbody>
+              </table>
+            </div>
+            <div id="priceEmpty" class="text-secondary small py-3">Belum ada pricecode. Klik “+ Tambah Pricecode” untuk menambahkan.</div>
+          </div>
+          <div id="productError" class="alert alert-danger d-none mt-3 mb-0"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="saveProduct">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

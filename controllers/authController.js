@@ -117,9 +117,10 @@ exports.login = async (req, res) => {
     }
 
     req.session.user = username;
-    req.session.stkid = user.stkid;
-    req.session.role = user.role;
-    req.session.stkid = user.stkid;
+    req.session.role = String(user.role || '').trim().toLowerCase();
+    // ADMIN tidak terikat pada stockist. STOCKIST terikat pada users.stkid.
+    req.session.stkid = req.session.role === 'admin' ? null : user.stkid;
+    req.session.inventoryStkid = null;
 
     req.session.param = {
       pricecode: param.pricecode,

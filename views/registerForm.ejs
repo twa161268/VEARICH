@@ -16,6 +16,7 @@
         <h2 class="fw-bold mb-1">Registrasi Member</h2>
         <div class="text-secondary">
           Register No: <strong><%= data.header.registerno %></strong>
+          &nbsp; | &nbsp; Stockist: <strong><%= data.header.stkid || '-' %><%= data.header.namastk ? ' - ' + data.header.namastk : '' %></strong>
         </div>
       </div>
       <a href="/register" class="btn btn-outline-secondary">
@@ -34,6 +35,12 @@
         <div class="reg-stat">
           <span>Jml PIN</span>
           <strong id="pinBought"><%= Number(data.header.tpin || 0).toLocaleString('id-ID') %></strong>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="reg-stat">
+          <span>Stockist</span>
+          <strong><%= data.header.stkid || '-' %></strong>
         </div>
       </div>
       <div class="col-md-4">

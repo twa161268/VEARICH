@@ -94,6 +94,7 @@ async function insertDetail(client, orderno, detail, pricecode) {
 
 async function create(body, actor) {
   throwValidation(validationErrors(body, actor.pricecode));
+  if (!actor.stkid) { const err = new Error('Stockist wajib dipilih untuk transaksi PIN.'); err.status = 422; throw err; }
   const client = await db.pool.connect();
 
   try {
@@ -143,6 +144,7 @@ async function create(body, actor) {
 
 async function update(orderno, body, actor) {
   throwValidation(validationErrors(body, actor.pricecode));
+  if (!actor.stkid) { const err = new Error('Stockist wajib dipilih untuk transaksi PIN.'); err.status = 422; throw err; }
   const client = await db.pool.connect();
 
   try {
@@ -155,6 +157,12 @@ async function update(orderno, body, actor) {
     if (!existing) {
       const err = new Error('Transaksi tidak ditemukan.');
       err.status = 404;
+      throw err;
+    }
+
+    if (existing.stbayar) {
+      const err = new Error('Transaksi PIN sudah diproses/dibayar sehingga tidak dapat diedit. Jika perlu koreksi, batalkan/hapus proses pembayaran terlebih dahulu.');
+      err.status = 409;
       throw err;
     }
 
@@ -207,6 +215,7 @@ async function getByOrderNo(orderno, stkid) {
 }
 
 async function remove(orderno, stkid) {
+  if (!stkid) { const err = new Error('Stockist wajib dipilih.'); err.status = 422; throw err; }
   const client = await db.pool.connect();
 
   try {
@@ -217,6 +226,12 @@ async function remove(orderno, stkid) {
     if (!existing) {
       const err = new Error('Transaksi tidak ditemukan.');
       err.status = 404;
+      throw err;
+    }
+
+    if (existing.stbayar) {
+      const err = new Error('Transaksi PIN sudah diproses/dibayar sehingga tidak dapat dihapus.');
+      err.status = 409;
       throw err;
     }
 

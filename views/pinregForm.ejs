@@ -71,13 +71,22 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Stockist ID</label>
-                <div class="form-control bg-light">
-                  <strong><%= stkid || '-' %></strong>
-                </div>
-                <small class="text-muted">
-                  Stockist sesuai yang sedang login.
-                </small>
+                <label class="form-label fw-semibold">Stockist ID <span class="text-danger">*</span></label>
+                <% if (isAdmin) { %>
+                  <select id="stkid" class="form-select" <%= edit ? 'disabled' : '' %> required>
+                    <option value="">Pilih Stockist...</option>
+                    <% stockists.forEach(s => { %>
+                      <option value="<%= s.stkid %>" <%= selectedStkid === s.stkid ? 'selected' : '' %>><%= s.stkid %> - <%= s.namastk || '' %></option>
+                    <% }) %>
+                  </select>
+                  <small class="text-muted">ADMIN wajib menentukan stockist transaksi.</small>
+                <% } else { %>
+                  <div class="form-control bg-light">
+                    <strong><%= sessionStkid || '-' %></strong>
+                  </div>
+                  <input type="hidden" id="stkid" value="<%= sessionStkid || '' %>">
+                  <small class="text-muted">Stockist mengikuti akun yang sedang login.</small>
+                <% } %>
               </div>
 
               <div class="col-md-6">
@@ -144,7 +153,7 @@
       <div id="pinToast" class="toast"><div class="toast-body"></div></div>
     </div>
     <script>
-      window.PINREG_EDIT=<%= edit ? 'true' : 'false' %>;window.PINREG_ORDERNO=<%- JSON.stringify(orderno || '') %>;window.PINREG_PRICECODE='<%= pricecode %>';
+      window.PINREG_EDIT=<%= edit ? 'true' : 'false' %>;window.PINREG_ORDERNO=<%- JSON.stringify(orderno || '') %>;window.PINREG_PRICECODE='<%= pricecode %>';window.PINREG_ADMIN=<%= isAdmin ? 'true' : 'false' %>;
     </script>
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/pinregForm.js"></script>

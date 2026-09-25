@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title><%= edit ? 'Edit' : 'Tambah' %> Pembelian PIN & Pengiriman</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css"><link rel="stylesheet" href="/icons/bootstrap-icons.css"><link rel="stylesheet" href="/css/transaksiPinKirim.css">
+</head>
+<body class="bg-light">
+<div class="container-fluid px-3 px-lg-4 py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><div class="tx-eyebrow">TRANSACTION CENTER</div><h2 class="fw-bold mb-1"><%= edit ? 'Edit' : 'Tambah' %> Pembelian PIN & Pengiriman</h2><div class="text-secondary">Satu Register → banyak transaksi PIN → satu pembayaran gabungan.</div></div>
+    <a href="/transaksi" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Kembali</a>
+  </div>
+  <form id="txForm">
+    <div class="card border-0 shadow-sm tx-card mb-3">
+      <div class="card-header bg-white border-0 p-3 p-lg-4"><div class="d-flex justify-content-between align-items-center"><div><h5 class="fw-bold mb-1">Data Pengiriman / Register</h5><small class="text-secondary">Register No dan STKID ditentukan sistem.</small></div><div class="text-end"><small class="text-secondary d-block">REGISTER NO</small><strong id="regPreview" class="text-primary"><%= edit ? registerno : 'OTOMATIS' %></strong></div></div></div>
+      <div class="card-body p-3 p-lg-4">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label fw-semibold">Kirim Barang</label><select id="kirim" class="form-select"><option value="false">Tidak</option><option value="true">Ya</option></select></div>
+          <div class="col-md-4"><label class="form-label fw-semibold">Ongkos Kirim</label><input id="ongkir" class="form-control money-input" inputmode="decimal" value="0"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold">Stockist ID <span class="text-danger">*</span></label>
+<% if (isAdmin) { %><select id="stkid" class="form-select" <%= edit?'disabled':'' %> required><option value="">Pilih Stockist...</option><% stockists.forEach(s => { %><option value="<%= s.stkid %>" <%= selectedStkid===s.stkid?'selected':'' %>><%= s.stkid %> - <%= s.namastk||'' %></option><% }) %></select><small class="text-muted">ADMIN wajib menentukan stockist transaksi.</small>
+<% } else { %><input id="stkid" class="form-control readonly" value="<%= sessionStkid %>" readonly><% } %></div>
+          <div class="col-md-6"><label class="form-label fw-semibold">Alamat</label><input id="alamat" maxlength="100" class="form-control"></div>
+          <div class="col-md-3"><label class="form-label fw-semibold">Kelurahan</label><input id="kelurahan" maxlength="50" class="form-control"></div>
+          <div class="col-md-3"><label class="form-label fw-semibold">Kecamatan</label><input id="kecamatan" maxlength="50" class="form-control"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold">Wilayah</label><input id="wilayah" maxlength="50" class="form-control"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold">Kota</label><input id="kota" maxlength="50" class="form-control"></div>
+          <div class="col-md-4"><label class="form-label fw-semibold">Kode Pos</label><input id="kodepos" maxlength="10" class="form-control"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm tx-card mb-3">
+      <div class="card-header bg-white border-0 p-3 p-lg-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div><h5 class="fw-bold mb-1">Transaksi Pembelian PIN</h5><small class="text-secondary">Pricecode <strong><%= pricecode %></strong> otomatis dari session.</small></div>
+        <button type="button" id="btnAddTx" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tambah Transaksi PIN</button>
+      </div>
+      <div class="card-body p-3" id="txRows"></div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm tx-card mb-3">
+          <div class="card-header bg-white border-0 p-3 p-lg-4 d-flex justify-content-between align-items-center"><div><h5 class="fw-bold mb-1">Pembayaran</h5><small class="text-secondary">Pembayaran dilakukan sekaligus untuk seluruh Register.</small></div><button type="button" id="btnAddPayment" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Tambah Pembayaran</button></div>
+          <div class="card-body p-3 p-lg-4"><div id="paymentRows"></div><div id="paymentEmpty" class="tx-empty text-center py-4">Belum ada pembayaran.</div></div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="tx-sticky">
+          <div class="tx-total-box shadow-sm mb-3">
+            <div><small>Total DP</small><strong id="totalDp">Rp 0</strong></div>
+            <div><small>Total BV</small><strong id="totalBv">0</strong></div>
+            <div><small>Total PIN</small><strong id="totalPin">0</strong></div>
+            <div><small>Ongkos Kirim</small><strong id="totalOngkir">Rp 0</strong></div>
+            <div class="border-top pt-3"><small>TOTAL TAGIHAN</small><strong id="grandTotal">Rp 0</strong></div>
+            <div><small>Total Pembayaran</small><strong id="totalPayment">Rp 0</strong></div>
+          </div>
+          <div id="paymentStatus" class="alert alert-secondary mb-0">Tambahkan transaksi PIN dan pembayaran.</div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-3"><a href="/transaksi" class="btn btn-outline-secondary">Batal</a><button id="btnSave" class="btn btn-primary px-4"><i class="bi bi-check2-circle me-1"></i>Simpan Transaksi</button></div>
+  </form>
+</div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3"><div id="txToast" class="toast"><div class="toast-body"></div></div></div>
+<script>
+window.TX_EDIT=<%= edit ? 'true':'false' %>;
+window.TX_REGISTER=<%- JSON.stringify(registerno||'') %>;
+window.TX_PRICECODE=<%- JSON.stringify(pricecode||'') %>;window.TX_ADMIN=<%= isAdmin ? 'true':'false' %>;
+</script>
+<script src="/js/bootstrap.bundle.min.js"></script><script src="/js/transaksiPinKirimForm.js"></script>
+</body></html>

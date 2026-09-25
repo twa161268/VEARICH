@@ -81,18 +81,14 @@ exports.create = async (req, res) => {
     }
 
     const userpass = await bcrypt.hash(userpassword, 10);
-    console.log(usernm, userpass, namafull, userrole, useractive);
+    const role = String(userrole || '').trim().toLowerCase();
+    const finalStkid = role === 'admin' ? null : (stkid || null);
+    if (role !== 'admin' && !finalStkid) {
+      return res.json({ success: false, msg: 'User STOCKIST wajib memiliki STKID.' });
+    }
     await db.query(
       'INSERT INTO users (username, password_hash, full_name, stkid, role,is_active, created_at, created_by) VALUES ($1,$2,$3,$4,$5,$6,now(),$7)',
-      [
-        usernm,
-        userpass,
-        namafull,
-        stkid,
-        userrole,
-        useractive,
-        req.session.user,
-      ]
+      [usernm,userpass,namafull,finalStkid,role,useractive,req.session.user]
     );
 
     //res.sendStatus(200);
@@ -114,11 +110,16 @@ exports.update = async (req, res) => {
 
     // ❗ penting: jangan ikutkan field WHERE ke data update
 
+    const role = String(d.userrole || '').trim().toLowerCase();
+    const finalStkid = role === 'admin' ? null : (d.stkid || null);
+    if (role !== 'admin' && !finalStkid) {
+      return res.json({ success: false, msg: 'User STOCKIST wajib memiliki STKID.' });
+    }
     const dataUpdate = {
       username: d.usernm,
       full_name: d.namafull,
-      stkid: d.stkid,
-      role: d.userrole,
+      stkid: finalStkid,
+      role,
       is_active: d.useractive,
     };
 

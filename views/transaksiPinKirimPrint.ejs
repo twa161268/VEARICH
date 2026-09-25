@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Nota <%= data.header.registerno %></title>
+<style>
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:0}.head{text-align:center;margin-bottom:14px}.head h2{margin:0;font-size:19px}.head .sub{margin-top:4px;font-size:12px}.head .reg{margin-top:5px;font-size:15px;font-weight:700}.meta{width:100%;border-collapse:collapse;margin-bottom:12px}.meta td{padding:3px 5px;vertical-align:top}.label{width:18%;font-weight:600}.table{width:100%;border-collapse:collapse;margin-top:6px}.table th,.table td{border:1px solid #aaa;padding:5px}.table th{background:#f0f0f0}.right{text-align:right}.center{text-align:center}.section{font-weight:700;font-size:12px;margin:13px 0 5px;border-bottom:1px solid #333;padding-bottom:3px}.totalbox{margin-top:8px;margin-left:auto;width:48%;border-collapse:collapse}.totalbox td{padding:4px 5px}.grand{font-size:13px;font-weight:700;border-top:2px solid #222}.note{margin-top:20px;font-size:9px;color:#555;text-align:center}.status{font-weight:700}.small{font-size:9px;color:#555}
+</style>
+</head>
+<body>
+<div class="head">
+  <h2><%= company || 'PERUSAHAAN' %></h2>
+  <div class="sub">NOTA TRANSAKSI PIN &amp; PENGIRIMAN</div>
+  <div class="reg"><%= data.header.registerno %></div>
+</div>
+<table class="meta">
+<tr><td class="label">Tanggal</td><td>: <%= data.header.createdt ? new Date(data.header.createdt).toLocaleString('id-ID') : '-' %></td><td class="label">Stockist</td><td>: <%= data.header.stkid || '-' %></td></tr>
+<tr><td class="label">Pengiriman</td><td>: <%= data.header.kirim ? 'Ya' : 'Tidak / Diambil' %></td><td class="label">Status Ambil</td><td class="status">: <%= data.header.status_ambil || 'BELUM' %></td></tr>
+<tr><td class="label">Nama Kirim</td><td>: <%= data.header.namakirim || '-' %></td><td class="label">Kode Pos</td><td>: <%= data.header.kodepos || '-' %></td></tr>
+<tr><td class="label">Alamat</td><td colspan="3">: <%= [data.header.alamat,data.header.kelurahan,data.header.kecamatan,data.header.wilayah,data.header.kota].filter(Boolean).join(', ') || '-' %></td></tr>
+</table>
+
+<div class="section">TRANSAKSI PIN</div>
+<table class="table">
+<thead><tr><th>Order No</th><th>Nama</th><th>Produk</th><th class="center">Qty</th><th class="right">DP</th><th class="right">BV</th><th class="right">PIN</th><th class="right">Jumlah</th></tr></thead>
+<tbody>
+<% data.details.forEach(d => { %>
+<tr><td><%= d.orderno %></td><td><%= (data.transactions.find(t=>t.orderno===d.orderno)||{}).nama || '-' %></td><td><%= d.prdname || d.prdid %></td><td class="center"><%= Number(d.qty||0).toLocaleString('id-ID') %></td><td class="right">Rp <%= Number(d.dp||0).toLocaleString('id-ID') %></td><td class="right"><%= Number(d.bv||0).toLocaleString('id-ID') %></td><td class="right"><%= Number(d.pin||0).toLocaleString('id-ID') %></td><td class="right">Rp <%= (Number(d.qty||0)*Number(d.dp||0)).toLocaleString('id-ID') %></td></tr>
+<% }) %>
+</tbody></table>
+
+<table class="totalbox">
+<tr><td>Total DP</td><td class="right">Rp <%= Number(data.header.tamount||0).toLocaleString('id-ID') %></td></tr>
+<tr><td>Ongkos Kirim</td><td class="right">Rp <%= Number(data.header.ongkir||0).toLocaleString('id-ID') %></td></tr>
+<tr class="grand"><td>TOTAL TAGIHAN</td><td class="right">Rp <%= Number(data.header.bayar||0).toLocaleString('id-ID') %></td></tr>
+</table>
+
+<div class="section">PEMBAYARAN</div>
+<table class="table"><thead><tr><th>Paytype</th><th>Deskripsi</th><th class="right">Amount</th><th>Catatan</th></tr></thead><tbody>
+<% data.payments.forEach(p => { %><tr><td><%= p.paytype %></td><td><%= p.deskripsi || '-' %></td><td class="right">Rp <%= Number(p.amount||0).toLocaleString('id-ID') %></td><td><%= p.catatan || '-' %></td></tr><% }) %>
+</tbody></table>
+<div style="text-align:right;font-weight:700;margin-top:6px">TOTAL PEMBAYARAN: Rp <%= data.payments.reduce((s,p)=>s+Number(p.amount||0),0).toLocaleString('id-ID') %></div>
+
+<div class="note">Nota ini merupakan bukti transaksi PIN, pembayaran dan pengiriman. Dicetak dari aplikasi Manajemen Stokist.</div>
+</body></html>

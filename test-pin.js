@@ -11,7 +11,7 @@ async function test() {
         p.prdid,
         p.prdname,
         p.status,
-        p.typeprd,
+        p.kode,
         p.prdgroup
       FROM master_prd p
       JOIN pricetab pt

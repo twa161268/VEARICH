@@ -1,8 +1,13 @@
 const db = require('../db');
 
-async function listRegisters({ stkid, search = '', page = 1, limit = 20 }) {
+async function listRegisters({ stkid = null, search = '', page = 1, limit = 20 }) {
   const offset = (page - 1) * limit;
   const q = `%${String(search).trim()}%`;
+  const scope = stkid ? 'AND k.stkid = $1' : '';
+  const params = stkid ? [stkid, q, limit, offset] : [q, limit, offset];
+  const pSearch = stkid ? '$2' : '$1';
+  const pLimit = stkid ? '$3' : '$2';
+  const pOffset = stkid ? '$4' : '$3';
 
   const rows = await db.query(
     `
@@ -15,71 +20,75 @@ async function listRegisters({ stkid, search = '', page = 1, limit = 20 }) {
       )::integer AS pin_sisa,
       k.namakirim,
       k.stkid,
+      ms.namastk,
       k.createdt
     FROM public.tr_kirim k
-    LEFT JOIN public.tr_register r
-      ON r.registerno = k.registerno
-    WHERE k.stkid = $1 AND
-    (k.registerno ILIKE $2
-       OR COALESCE(k.namakirim, '') ILIKE $2)
-    GROUP BY k.registerno, k.tpin, k.namakirim, k.stkid, k.createdt
+    LEFT JOIN public.tr_register r ON r.registerno = k.registerno
+    LEFT JOIN public.master_stk ms ON ms.stkid = k.stkid
+    WHERE 1=1 ${scope}
+      AND (k.registerno ILIKE ${pSearch}
+        OR COALESCE(k.namakirim, '') ILIKE ${pSearch}
+        OR COALESCE(ms.namastk, '') ILIKE ${pSearch})
+    GROUP BY k.registerno, k.tpin, k.namakirim, k.stkid, ms.namastk, k.createdt
     ORDER BY k.createdt DESC NULLS LAST, k.registerno DESC
-    LIMIT $3 OFFSET $4
+    LIMIT ${pLimit} OFFSET ${pOffset}
     `,
-    [stkid, q, limit, offset]
+    params
   );
 
+  const countParams = stkid ? [stkid, q] : [q];
+  const countSearch = stkid ? '$2' : '$1';
   const count = await db.query(
     `
     SELECT COUNT(*)::int AS total
     FROM public.tr_kirim k
-    WHERE k.stkid = $1 AND
-    (k.registerno ILIKE $2
-       OR COALESCE(k.namakirim, '') ILIKE $2)
+    LEFT JOIN public.master_stk ms ON ms.stkid = k.stkid
+    WHERE 1=1 ${scope}
+      AND (k.registerno ILIKE ${countSearch}
+        OR COALESCE(k.namakirim, '') ILIKE ${countSearch}
+        OR COALESCE(ms.namastk, '') ILIKE ${countSearch})
     `,
-    [stkid, q]
+    countParams
   );
 
-  return {
-    rows,
-    total: count[0]?.total || 0,
-    page,
-    limit,
-  };
+  return { rows, total: count[0]?.total || 0, page, limit };
 }
 
-async function getRegisterForUpdate(client, registerno, stkid) {
+async function getRegisterForUpdate(client, registerno, stkid = null) {
   const result = await client.query(
     `
     SELECT registerno, tpin, stkid, namakirim
     FROM public.tr_kirim
-    WHERE registerno = $1 AND stkid = $2
+    WHERE registerno = $1
+      ${stkid ? 'AND stkid = $2' : ''}
     FOR UPDATE
     `,
-    [registerno, stkid]
+    stkid ? [registerno, stkid] : [registerno]
   );
   return result.rows[0] || null;
 }
 
-async function getRegister(registerno, stkid) {
+async function getRegister(registerno, stkid = null) {
   const result = await db.query(
     `
     SELECT
       k.registerno,
       k.tpin,
       k.stkid,
+      ms.namastk,
       k.namakirim,
       COALESCE(SUM(r.pin_terpakai), 0)::integer AS pin_terpakai,
       (
         COALESCE(k.tpin, 0) - COALESCE(SUM(r.pin_terpakai), 0)
       )::integer AS pin_sisa
     FROM public.tr_kirim k
-    LEFT JOIN public.tr_register r
-      ON r.registerno = k.registerno
-    WHERE k.registerno = $1 AND k.stkid = $2
-    GROUP BY k.registerno, k.tpin, k.stkid, k.namakirim
+    LEFT JOIN public.tr_register r ON r.registerno = k.registerno
+    LEFT JOIN public.master_stk ms ON ms.stkid = k.stkid
+    WHERE k.registerno = $1
+      ${stkid ? 'AND k.stkid = $2' : ''}
+    GROUP BY k.registerno, k.tpin, k.stkid, ms.namastk, k.namakirim
     `,
-    [registerno, stkid]
+    stkid ? [registerno, stkid] : [registerno]
   );
   return result[0] || null;
 }

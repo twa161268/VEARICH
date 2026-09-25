@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Transaksi PIN & Pengiriman</title>
+<link rel="stylesheet" href="/css/bootstrap.min.css"><link rel="stylesheet" href="/icons/bootstrap-icons.css"><link rel="stylesheet" href="/css/transaksiPinKirim.css">
+</head>
+<body class="bg-light">
+<div class="container-fluid px-3 px-lg-4 py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><div class="tx-eyebrow">TRANSACTION CENTER</div><h2 class="fw-bold mb-1">Pembelian PIN & Pengiriman</h2><div class="text-secondary">Satu Register dapat memuat beberapa transaksi PIN dan satu pembayaran gabungan.</div></div>
+    <div class="d-flex gap-2"><a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Kembali</a><a id="btnNewTx" href="/transaksi/form" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Transaksi Baru</a></div>
+  </div>
+  <div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="tx-stat"><span>Total Register</span><strong id="statTotal">0</strong></div></div>
+    <div class="col-md-4"><div class="tx-stat"><span>Ditampilkan</span><strong id="statShown">0</strong></div></div>
+    <div class="col-md-4"><div class="tx-stat"><span>Total Transaksi PIN</span><strong id="statPin">0</strong></div></div>
+  </div>
+  <div class="card border-0 shadow-sm tx-card">
+    <div class="card-header bg-white border-0 p-3 p-lg-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div><h5 class="fw-bold mb-1">Daftar Register</h5><small class="text-secondary">Klik Register No untuk membuka seluruh transaksi PIN dan pembayaran.</small></div>
+      <% if (isAdmin) { %>
+        <div style="min-width:260px"><select id="stockistFilter" class="form-select bg-light"><option value="">Semua Stockist</option><% stockists.forEach(s => { %><option value="<%= s.stkid %>" <%= selectedStkid===s.stkid?'selected':'' %>><%= s.stkid %> - <%= s.namastk||'' %></option><% }) %></select></div>
+      <% } %><div class="input-group tx-search"><span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span><input id="search" class="form-control bg-light border-start-0" placeholder="Cari register, nama, kota..."></div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>Stockist</th><th>Register No</th><th>Jumlah PIN</th><th>Nama/Penerima</th><th>Kota</th><th class="text-end">Total DP</th><th class="text-end">Ongkir</th><th class="text-end">Total Tagihan</th><th class="text-end">Bayar</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="11" class="text-center py-5 text-secondary">Memuat data...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card-footer bg-white border-0 d-flex justify-content-center align-items-center gap-3 py-3"><button id="prev" class="btn btn-sm btn-outline-secondary">← Sebelumnya</button><span id="pageInfo" class="small text-secondary"></span><button id="next" class="btn btn-sm btn-outline-secondary">Berikutnya →</button></div>
+  </div>
+</div>
+<script>window.TX_PAGE=true;window.TX_ADMIN=<%= isAdmin ? "true":"false" %>;</script><script src="/js/bootstrap.bundle.min.js"></script><script src="/js/transaksiPinKirim.js"></script>
+</body></html>

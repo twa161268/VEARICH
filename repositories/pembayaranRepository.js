@@ -18,7 +18,12 @@ async function listRegisters({ stkid, search = '', page = 1, limit = 20 }) {
       k.kodepos,
       k.bayar,
       k.ongkir,
-      k.createdt
+      k.createdt,
+      k.status_ambil,
+      EXISTS(
+        SELECT 1 FROM public.tr_register r
+        WHERE r.registerno=k.registerno
+      ) AS has_registration
     FROM public.tr_kirim k
     WHERE k.stkid = $1
       AND (k.registerno ILIKE $2
@@ -317,7 +322,34 @@ RETURNING orderno
   );
 }
 
-async function deleteRegister(client, registerno) {
+async function deleteRegister(client, registerno, stkid) {
+  const picked = await client.query(
+    `SELECT status_ambil FROM public.tr_kirim
+     WHERE registerno=$1 AND stkid=$2
+     FOR UPDATE`,
+    [registerno, stkid]
+  );
+  if (!picked.rows[0]) {
+    const err = new Error('Register tidak ditemukan.');
+    err.status = 404;
+    throw err;
+  }
+  if (picked.rows[0].status_ambil && picked.rows[0].status_ambil !== 'BELUM') {
+    const err = new Error(`Register ${registerno} sudah berstatus ${picked.rows[0].status_ambil} dan tidak dapat dihapus.`);
+    err.status = 409;
+    throw err;
+  }
+
+  const registered = await client.query(
+    `SELECT 1 FROM public.tr_register WHERE registerno=$1 LIMIT 1`,
+    [registerno]
+  );
+  if (registered.rows.length) {
+    const err = new Error(`Register ${registerno} sudah memiliki registrasi member dan tidak dapat dihapus.`);
+    err.status = 409;
+    throw err;
+  }
+
   await client.query(`DELETE FROM public.tr_bayar WHERE registerno = $1`, [
     registerno,
   ]);

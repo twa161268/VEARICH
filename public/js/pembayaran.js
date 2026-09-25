@@ -17,7 +17,9 @@ async function loadData() {
       <td>${esc(r.kelurahan || '-')}</td><td>${esc(r.kecamatan || '-')}</td><td>${esc(r.wilayah || '-')}</td>
       <td>${esc(r.kota || '-')}</td><td>${esc(r.kodepos || '-')}</td>
       <td class="text-end">${money(r.bayar)}</td><td class="text-end">${money(r.ongkir)}</td>
-      <td class="text-center"><button class="btn btn-sm btn-link text-danger p-0" title="Hapus" onclick="deleteRegister('${esc(r.registerno)}')"><i class="bi bi-trash3 fs-5"></i></button></td>
+      <td class="text-center">${(r.status_ambil && r.status_ambil !== 'BELUM') || r.has_registration
+        ? '<span class="text-secondary small" title="Sudah diproses/terhubung registrasi member">🔒</span>'
+        : `<button class="btn btn-sm btn-link text-danger p-0" title="Hapus" onclick="deleteRegister('${esc(r.registerno)}')"><i class="bi bi-trash3 fs-5"></i></button>`}</td>
     </tr>`).join('') : '<tr><td colspan="12" class="text-center py-5 text-secondary">Belum ada data pembayaran/pengiriman.</td></tr>';
   const pages = Math.max(1, Math.ceil(x.total / x.limit));
   $('pageInfo').textContent = `Halaman ${x.page} / ${pages}`;

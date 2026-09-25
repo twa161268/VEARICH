@@ -25,6 +25,10 @@ async function loadData() {
     limit: state.limit,
     search: state.search,
   });
+  if (window.PINREG_ADMIN) {
+    const f = $('stockistFilter');
+    if (f && f.value) qs.set('stkid', f.value);
+  }
   const res = await fetch('/pinreg/load?' + qs);
   const json = await res.json();
   if (!res.ok || !json.success)
@@ -39,16 +43,21 @@ async function loadData() {
     ? x.rows
         .map(
           (r) =>
-            `<tr><td><a class="fw-bold text-primary text-decoration-none" href="/pinreg/form/${encodeURIComponent(r.orderno)}">${esc(r.orderno)}</a></td><td>${esc(r.registerno || '-')}</td><td><strong>${esc(r.nama || '-')}</strong></td><td>${esc(r.usernamesp || '-')}</td><td>${r.createdt ? new Date(r.createdt).toLocaleDateString('id-ID') : '-'}</td><td class="text-end">${money(r.total_harga)}</td><td class="text-end">${Number(r.total_pin || 0).toLocaleString('id-ID')}</td><td class="text-end">${Number(r.total_bv || 0).toLocaleString('id-ID')}</td><td>${r.stbayar === true ? '<span class="badge text-bg-success">sudah</span>' : '<span class="badge text-bg-secondary">belum</span>'}</td><td><a class="btn btn-sm btn-outline-primary" href="/pinreg/form/${encodeURIComponent(r.orderno)}">Buka</a></td></tr>`
+            `<tr><td>${esc(r.stkid || '-')}</td><td><a class="fw-bold text-primary text-decoration-none" href="/pinreg/form/${encodeURIComponent(r.orderno)}">${esc(r.orderno)}</a></td><td>${esc(r.registerno || '-')}</td><td><strong>${esc(r.nama || '-')}</strong></td><td>${esc(r.usernamesp || '-')}</td><td>${r.createdt ? new Date(r.createdt).toLocaleDateString('id-ID') : '-'}</td><td class="text-end">${money(r.total_harga)}</td><td class="text-end">${Number(r.total_pin || 0).toLocaleString('id-ID')}</td><td class="text-end">${Number(r.total_bv || 0).toLocaleString('id-ID')}</td><td>${r.stbayar === true ? '<span class="badge text-bg-success">sudah</span>' : '<span class="badge text-bg-secondary">belum</span>'}</td><td><a class="btn btn-sm btn-outline-primary" href="/pinreg/form/${encodeURIComponent(r.orderno)}">Buka</a></td></tr>`
         )
         .join('')
-    : '<tr><td colspan="10" class="text-center py-5 text-secondary">Belum ada transaksi.</td></tr>';
+    : '<tr><td colspan="11" class="text-center py-5 text-secondary">Belum ada transaksi.</td></tr>';
   const pages = Math.max(1, Math.ceil(x.total / x.limit));
   $('pageInfo').textContent = `Halaman ${x.page} / ${pages}`;
   $('prev').disabled = x.page <= 1;
   $('next').disabled = x.page >= pages;
 }
-$('btnTambah').onclick = () => (location.href = '/pinreg/form');
+$('btnTambah').onclick = () => {
+  if (window.PINREG_ADMIN) {
+    const f=$('stockistFilter'); const v=f?.value||'';
+    location.href = '/pinreg/form' + (v ? ('?stkid='+encodeURIComponent(v)) : '');
+  } else location.href='/pinreg/form';
+};
 $('prev').onclick = () => {
   if (state.page > 1) {
     state.page--;
@@ -59,6 +68,8 @@ $('next').onclick = () => {
   state.page++;
   loadData();
 };
+const stockistFilter = $('stockistFilter');
+if (stockistFilter) stockistFilter.addEventListener('change', () => { state.page=1; loadData(); });
 let timer;
 $('search').addEventListener('input', (e) => {
   clearTimeout(timer);

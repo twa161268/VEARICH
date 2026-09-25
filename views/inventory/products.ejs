@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Produk Inventory</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+    <link rel="stylesheet" href="/css/inventory.css" />
+  </head>
+  <body>
+    <div id="inventoryContext"></div><div class="container-fluid p-3 p-lg-4">
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap"
+      >
+        <div>
+          <div class="eyebrow">MASTER PRODUK</div>
+          <h2 class="fw-bold">Produk Inventory</h2>
+          <div class="text-secondary">
+            Kelola Master Produk dan seluruh pricecode.
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button id="addProduct" class="btn btn-primary">+ Produk</button
+          ><a href="/inventory" class="btn btn-outline-secondary"
+            >← Inventory</a
+          >
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="input-group mb-3" style="max-width: 450px">
+            <span class="input-group-text">⌕</span
+            ><input
+              id="search"
+              class="form-control"
+              placeholder="Kode, nama, barcode"
+            />
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Produk / Kategori</th>
+                  <th>Barcode</th>
+                  <th>Satuan</th>
+                  <th class="text-end">Minimum</th>
+                  <th>Managed</th>
+                  <th>Status</th>
+                  <th class="text-center">Pricecode</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <button id="prev" class="btn btn-sm btn-outline-secondary">←</button
+            ><span id="info"></span
+            ><button id="next" class="btn btn-sm btn-outline-secondary">
+              →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%- include('_productModal') %>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/inventory-products.js"></script>
+  <script src="/js/inventory-context.js"></script></body>
+</html>

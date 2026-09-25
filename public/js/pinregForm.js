@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const PC = window.PINREG_PRICECODE || '';
-const S = { rows: [], products: [] };
+const S = { rows: [], products: [], readOnly: false };
 const money = (v) =>
   new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -50,7 +50,7 @@ function render() {
   box.innerHTML = S.rows
     .map(
       (r, i) =>
-        `<div class="pin-detail row g-2 align-items-end"><div class="col-lg-3"><label class="form-label">Produk</label><select class="form-select form-select-sm" onchange="pickProduct(${i},this.value)">${productOptions(r.prdid)}</select></div><div class="col-lg-1"><label class="form-label">Price</label><input class="form-control form-control-sm readonly" value="${PC}" readonly></div><div class="col-lg-1"><label class="form-label">Qty</label><input class="form-control form-control-sm" type="number" min="1" step="1" value="${r.qty}" onchange="changeQty(${i},this.value)"></div><div class="col-lg-2"><label class="form-label">DP / Unit</label><input class="form-control form-control-sm readonly" value="${money(r.dp)}" readonly></div><div class="col-lg-2"><label class="form-label">BV / Unit</label><input class="form-control form-control-sm readonly" value="${r.bv}" readonly></div><div class="col-lg-2"><label class="form-label">PIN / Unit</label><input class="form-control form-control-sm readonly" value="${r.pin}" readonly></div><div class="col-lg-1"><button type="button" class="btn btn-outline-danger btn-sm w-100 pin-remove" onclick="removeRow(${i})"><i class="bi bi-trash"></i></button></div></div>`
+        `<div class="pin-detail row g-2 align-items-end"><div class="col-lg-3"><label class="form-label">Produk</label><select class="form-select form-select-sm" onchange="pickProduct(${i},this.value)" ${S.readOnly ? "disabled" : ""}>${productOptions(r.prdid)}</select></div><div class="col-lg-1"><label class="form-label">Price</label><input class="form-control form-control-sm readonly" value="${PC}" readonly></div><div class="col-lg-1"><label class="form-label">Qty</label><input class="form-control form-control-sm" type="number" min="1" step="1" value="${r.qty}" onchange="changeQty(${i},this.value)" ${S.readOnly ? "disabled" : ""}></div><div class="col-lg-2"><label class="form-label">DP / Unit</label><input class="form-control form-control-sm readonly" value="${money(r.dp)}" readonly></div><div class="col-lg-2"><label class="form-label">BV / Unit</label><input class="form-control form-control-sm readonly" value="${r.bv}" readonly></div><div class="col-lg-2"><label class="form-label">PIN / Unit</label><input class="form-control form-control-sm readonly" value="${r.pin}" readonly></div><div class="col-lg-1"><button type="button" class="btn btn-outline-danger btn-sm w-100 pin-remove" onclick="removeRow(${i})" ${S.readOnly ? "disabled" : ""}><i class="bi bi-trash"></i></button></div></div>`
     )
     .join('');
   calc();
@@ -114,10 +114,25 @@ async function init() {
       '/pinreg/load/' + encodeURIComponent(window.PINREG_ORDERNO)
     );
     const h = x.data.header;
+    if ($('stkid')) $('stkid').value = h.stkid || $('stkid').value || '';
+    S.readOnly = !!h.stbayar;
 
-    ['nama', 'nohp', 'usernamesp', 'namasp', 'registerno'].forEach(
-      (n) => ($(n).value = h[n] || '')
+    ['nama', 'nohp', 'usernamesp', 'namasp', 'registerno', 'stkid'].forEach(
+      (n) => {
+        $(n).value = h[n] || '';
+        $(n).disabled = S.readOnly;
+      }
     );
+    const saveBtn = $('btnSimpan');
+    if (saveBtn) saveBtn.disabled = S.readOnly;
+    const addBtn = $('btnTambahProduk');
+    if (addBtn) addBtn.disabled = S.readOnly;
+    if (S.readOnly) {
+      const note = document.createElement('div');
+      note.className = 'alert alert-warning mt-3';
+      note.textContent = 'Transaksi sudah dibayar/diproses dan bersifat read-only.';
+      $('detailRows').before(note);
+    }
 
     S.rows = x.data.details.map((d) => ({
       prdid: d.prdid,
@@ -132,6 +147,7 @@ async function init() {
 $('btnTambahProduk').onclick = () => addRow();
 $('pinregForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (S.readOnly) return alert('Transaksi sudah dibayar/diproses dan tidak dapat diedit.');
   if (!S.rows.length) return alert('Tambahkan minimal satu produk.');
   const body = {
     nama: $('nama').value.trim(),
@@ -139,12 +155,14 @@ $('pinregForm').addEventListener('submit', async (e) => {
     usernamesp: $('usernamesp').value.trim(),
     namasp: $('namasp').value.trim(),
     registerno: $('registerno').value.trim(),
+    stkid: $('stkid')?.value || '',
     details: S.rows.map((r) => ({
       prdid: r.prdid,
       qty: r.qty,
     })),
   };
   if (!body.nama) return alert('Nama wajib diisi.');
+  if (!body.stkid) return alert('Stockist wajib dipilih.');
   if (S.rows.some((r) => !r.prdid || !Number.isInteger(r.qty) || r.qty <= 0))
     return alert('Periksa produk dan quantity.');
   const btn = $('btnSimpan');

@@ -32,12 +32,28 @@
               Jml PIN berasal dari <strong>tr_kirim.tpin</strong>.
             </small>
           </div>
-          <div class="input-group reg-search">
-            <span class="input-group-text bg-light border-end-0">
-              <i class="bi bi-search"></i>
-            </span>
-            <input id="search" class="form-control bg-light border-start-0"
-                   placeholder="Cari register / nama kirim..." />
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <% if (isAdmin) { %>
+              <div style="min-width:260px">
+                <select id="stockistFilter" class="form-select bg-light">
+                  <option value="">Semua Stockist</option>
+                  <% stockists.forEach(s => { %>
+                    <option value="<%= s.stkid %>" <%= selectedStkid === s.stkid ? 'selected' : '' %>>
+                      <%= s.stkid %> - <%= s.namastk || '' %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+            <% } else { %>
+              <span class="badge text-bg-primary px-3 py-2">Stockist: <%= selectedStkid || '-' %></span>
+            <% } %>
+            <div class="input-group reg-search">
+              <span class="input-group-text bg-light border-end-0">
+                <i class="bi bi-search"></i>
+              </span>
+              <input id="search" class="form-control bg-light border-start-0"
+                     placeholder="Cari register / nama / stockist..." />
+            </div>
           </div>
         </div>
       </div>
@@ -76,6 +92,7 @@
 
   <script>
     window.REGISTER_PRICECODE = <%- JSON.stringify(pricecode) %>;
+    window.REGISTER_ADMIN = <%- JSON.stringify(Boolean(isAdmin)) %>;
   </script>
   <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="/js/register.js"></script>

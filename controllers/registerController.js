@@ -1,4 +1,6 @@
 const service = require('../services/registerService');
+const db = require('../db');
+const { isAdmin, sessionStkid } = require('../middleware/accessScope');
 
 function sendError(res, err) {
   console.error('❌ REGISTRASI MEMBER ERROR:', err);
@@ -13,9 +15,16 @@ function actor(req) {
   return service.actor(req);
 }
 
-exports.page = (req, res) => {
+exports.page = async (req, res) => {
+  const stockists = await db.query(`SELECT stkid, namastk FROM public.master_stk ORDER BY stkid`);
+  const selectedStkid = isAdmin(req) ? (req.query.stkid || '') : sessionStkid(req);
+
   res.render('register', {
     user: req.session.user || null,
+    role: req.session.role,
+    isAdmin: isAdmin(req),
+    stockists,
+    selectedStkid,
     pricecode: req.session?.param?.pricecode || '',
   });
 };
@@ -30,12 +39,17 @@ exports.form = async (req, res) => {
 
     // const data = await service.getDetail(registerno);
 
-    const data = await service.getDetail(registerno, req.session.stkid);
+    const data = await service.getDetail(
+      registerno,
+      isAdmin(req) ? null : sessionStkid(req)
+    );
 
     if (!data) return res.status(404).send('Register No tidak ditemukan.');
 
     res.render('registerForm', {
       user: req.session.user || null,
+      role: req.session.role,
+      isAdmin: isAdmin(req),
       pricecode: req.session?.param?.pricecode || '',
       data,
     });
@@ -50,7 +64,7 @@ exports.load = async (req, res) => {
     const limit = Math.min(Math.max(Number(req.query.limit || 20), 1), 100);
 
     const data = await service.listRegisters({
-      stkid: req.session.stkid,
+      stkid: isAdmin(req) ? (req.query.stkid || null) : sessionStkid(req),
       search: req.query.search || '',
       page,
       limit,
@@ -66,7 +80,7 @@ exports.detail = async (req, res) => {
   try {
     const data = await service.getDetail(
       req.params.registerno,
-      req.session.stkid
+      isAdmin(req) ? null : sessionStkid(req)
     );
 
     if (!data)

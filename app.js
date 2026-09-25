@@ -8,9 +8,9 @@ const stokistRoutes = require('./routes/stokistRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const authRoutes = require('./routes/authRoutes');
 const mloginRoutes = require('./routes/mloginRoutes');
-const pinregRoutes = require('./routes/pinregRoutes');
-const pembayaranRoutes = require('./routes/pembayaranRoutes');
+const transaksiRoutes = require('./routes/transaksiRoutes');
 const registerRoutes = require('./routes/registerRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./db');
@@ -76,11 +76,11 @@ app.get('/', (req, res) => {
 
 // API ROUTES
 app.use('/stokist', stokistRoutes);
-app.use('/pinreg', pinregRoutes);
-app.use('/pembayaran', pembayaranRoutes);
+app.use('/transaksi', transaksiRoutes);
 app.use('/report', reportRoutes);
 app.use('/mlogin', mloginRoutes);
 app.use('/register', registerRoutes);
+app.use('/inventory', inventoryRoutes);
 app.use('/', authRoutes);
 
 const PORT = process.env.PORT || 3000;

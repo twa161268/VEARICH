@@ -46,11 +46,11 @@ async function listRegisters(args) {
   return repo.listRegisters(args);
 }
 
-async function getDetail(registerno, stkid) {
+async function getDetail(registerno, stkid = null) {
   const header = await repo.getRegister(registerno, stkid);
   if (!header) return null;
 
-  const registrations = await repo.listRegistrations(registerno, stkid);
+  const registrations = await repo.listRegistrations(registerno);
 
   return { header, registrations };
 }

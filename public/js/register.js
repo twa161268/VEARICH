@@ -24,6 +24,10 @@ async function loadData() {
     search: state.search,
   });
 
+  if (window.REGISTER_ADMIN && $('stockistFilter')?.value) {
+    qs.set('stkid', $('stockistFilter').value);
+  }
+
   const res = await fetch('/register/load?' + qs);
   const json = await res.json();
 
@@ -68,6 +72,15 @@ async function loadData() {
   $('pageInfo').textContent = `Halaman ${x.page} / ${pages}`;
   $('prev').disabled = x.page <= 1;
   $('next').disabled = x.page >= pages;
+}
+
+
+const stockistFilter = $('stockistFilter');
+if (stockistFilter) {
+  stockistFilter.addEventListener('change', () => {
+    state.page = 1;
+    loadData().catch((e) => alert(e.message));
+  });
 }
 
 $('prev').onclick = () => {

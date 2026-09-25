@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Inventory</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
+    <link rel="stylesheet" href="/css/inventory.css" />
+  </head>
+  <body>
+    <div id="inventoryContext"></div><div class="container-fluid p-3 p-lg-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <div class="eyebrow">STOCK MANAGEMENT</div>
+          <h1 class="fw-bold mb-1">Inventory</h1>
+          <div class="text-secondary">
+            Gudang: ditentukan otomatis dari stockist login.
+          </div>
+        </div>
+        <a href="/" class="btn btn-outline-secondary">← Menu Utama</a>
+      </div>
+      <div class="d-flex gap-2 flex-wrap mb-4">
+        <a class="btn btn-primary" href="/inventory/dashboard">Dashboard</a
+        ><a class="btn btn-outline-primary" href="/inventory/reports"
+          >Laporan</a
+        >
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/products">
+            <b>Produk</b>
+            <img
+              class="inv-card-icon"
+              src="/images/invt/produk.png"
+              alt="Produk"
+            />
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/master/satuan">
+            <b>Satuan</b>
+            <img
+              class="inv-card-icon"
+              src="/images/invt/satuan.png"
+              alt="Satuan"
+            />
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/master/kategori">
+            <b>Kategori</b>
+            <img
+              class="inv-card-icon"
+              src="/images/invt/kategori.png"
+              alt="Kategori"
+            />
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/master/supplier">
+            <b>Supplier</b>
+            <img
+              class="inv-card-icon"
+              src="/images/invt/supplier.png"
+              alt="Supplier"
+            />
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/master/gudang">
+            <b>Gudang</b>
+            <img
+              class="inv-card-icon"
+              src="/images/invt/gudang.png"
+              alt="Gudang"
+            />
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/master/batch">
+            <b>Batch</b>
+            <img
+              class="inv-card-icon"
+              src="/images/invt/batch.png"
+              alt="Batch"
+            />
+          </a>
+        </div>
+      </div>
+      <h4 class="fw-bold mt-5 mb-3">Transaksi</h4>
+
+      <div class="row g-3">
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/masuk">
+            <b>Barang Masuk</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/keluar">
+            <b>Barang Keluar</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/retur_beli">
+            <b>Retur Pembelian</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/retur_jual">
+            <b>Retur Penjualan</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/transfer">
+            <b>Transfer Gudang</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/adjustment">
+            <b>Adjustment</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+
+        <div class="col-md-4 col-xl-3">
+          <a class="inv-card" href="/inventory/transaksi/opname">
+            <b>Stock Opname</b>
+            <span>DRAFT → FINAL → STOCK</span>
+          </a>
+        </div>
+      </div>
+
+      <h4 class="fw-bold mt-5 mb-3">Stock & Pickup</h4>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <a class="inv-card" href="/inventory/stock"
+            ><b>Stock Balance</b><span>Saldo saat ini</span></a
+          >
+        </div>
+        <div class="col-md-4">
+          <a class="inv-card" href="/inventory/movement"
+            ><b>Kartu Stock</b><span>Stock movement</span></a
+          >
+        </div>
+        <div class="col-md-4">
+          <a class="inv-card" href="/inventory/pickup"
+            ><b>Pengambilan Barang</b><span>Penjualan / Pickup</span></a
+          >
+        </div>
+      </div>
+    </div>
+  <script src="/js/inventory-context.js"></script></body>
+</html>

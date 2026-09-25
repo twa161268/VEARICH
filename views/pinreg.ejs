@@ -59,7 +59,18 @@
                 >Klik Order No untuk membuka transaksi.</small
               >
             </div>
-            <div class="input-group pin-search">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <% if (isAdmin) { %>
+              <div style="min-width:260px">
+                <select id="stockistFilter" class="form-select bg-light">
+                  <option value="">Semua Stockist</option>
+                  <% stockists.forEach(s => { %>
+                    <option value="<%= s.stkid %>" <%= selectedStkid === s.stkid ? 'selected' : '' %>><%= s.stkid %> - <%= s.namastk || '' %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <% } %>
+              <div class="input-group pin-search">
               <span class="input-group-text bg-light border-end-0"
                 ><i class="bi bi-search"></i
               ></span>
@@ -68,6 +79,7 @@
                 class="form-control bg-light border-start-0"
                 placeholder="Cari order, nama, sponsor..."
               />
+              </div>
             </div>
           </div>
         </div>
@@ -75,7 +87,7 @@
           <table class="table table-hover align-middle mb-0" id="tblPinreg">
             <thead>
               <tr>
-                <th>Order No</th>
+                <th>Stockist</th><th>Order No</th>
                 <th>Register No</th>
                 <th>Nama</th>
                 <th>Username Sponsor</th>
@@ -89,7 +101,7 @@
             </thead>
             <tbody id="rows">
               <tr>
-                <td colspan="10" class="text-center py-5 text-secondary">
+                <td colspan="11" class="text-center py-5 text-secondary">
                   Memuat data...
                 </td>
               </tr>
@@ -110,7 +122,7 @@
       </div>
     </div>
     <script>
-      window.PINREG_PRICECODE = '<%= pricecode %>';
+      window.PINREG_PRICECODE = '<%= pricecode %>'; window.PINREG_ADMIN=<%= isAdmin ? 'true' : 'false' %>;
     </script>
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script src="/js/pinreg.js"></script>

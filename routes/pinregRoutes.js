@@ -13,6 +13,7 @@ router.get('/', requireRole('ADMIN', 'STOKIST'), ctrl.index);
 router.get('/', ctrl.page);
 router.get('/form', ctrl.form);
 router.get('/form/:orderno', ctrl.form);
+router.get('/stockists', ctrl.stockists);
 router.get('/load', ctrl.load);
 router.get('/load/:orderno', ctrl.loadByOrderNo);
 router.get('/products', ctrl.products);
@@ -40,6 +41,7 @@ router.get('/', ctrl.page);
 router.get('/form', ctrl.form);
 router.get('/form/:orderno', ctrl.form);
 
+router.get('/stockists', ctrl.stockists);
 router.get('/load', ctrl.load);
 router.get('/load/:orderno', ctrl.loadByOrderNo);
 

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Inventory</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/icons/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/inventory.css">
+</head>
+<body>
+<div id="inventoryContext"></div><div class="container-fluid p-3 p-lg-4">
+  <div class="d-flex justify-content-between mb-4 gap-2 flex-wrap">
+    <div><div class="eyebrow">INVENTORY</div><h2 class="fw-bold">Dashboard</h2><div class="text-secondary">Ringkasan stock dan pekerjaan warehouse.</div></div>
+    <a href="/inventory" class="btn btn-outline-secondary">← Inventory</a>
+  </div>
+
+  <div class="row g-3">
+    <% [['Total Produk',stats.stock.products],['Total Qty',Number(stats.stock.qty).toLocaleString('id-ID')],['Stok Minimum',stats.mminimum],['Expired ≤ 30 hari',stats.expired],['DRAFT',stats.draft],['Pickup BELUM',stats.pickup]].forEach(x=>{ %>
+      <div class="col-6 col-md-4 col-xl-2"><div class="inv-card"><span><%=x[0]%></span><b style="font-size:1.7rem"><%=x[1]%></b></div></div>
+    <% }) %>
+  </div>
+
+  <div class="dashboard-section mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+      <div><h5 class="fw-bold mb-1">Quick Action</h5><div class="text-secondary small">Aksi yang paling sering digunakan tanpa harus masuk ke menu lain.</div></div>
+    </div>
+    <div class="quick-actions">
+      <button type="button" class="quick-action primary" id="addProduct"><span class="quick-icon">+</span><span><strong>Produk</strong><small>Produk + Pricecode</small></span></button>
+      <a class="quick-action" href="/inventory/transaksi/masuk"><span class="quick-icon">↓</span><span><strong>Barang Masuk</strong><small>Input penerimaan</small></span></a>
+      <a class="quick-action" href="/inventory/transaksi/keluar"><span class="quick-icon">↑</span><span><strong>Barang Keluar</strong><small>Input pengeluaran</small></span></a>
+      <a class="quick-action" href="/inventory/transaksi/transfer"><span class="quick-icon">⇄</span><span><strong>Transfer</strong><small>Pindah gudang</small></span></a>
+      <a class="quick-action" href="/inventory/transaksi/adjustment"><span class="quick-icon">±</span><span><strong>Adjustment</strong><small>Koreksi stock</small></span></a>
+      <a class="quick-action" href="/inventory/transaksi/opname"><span class="quick-icon">✓</span><span><strong>Stock Opname</strong><small>Hitung stock fisik</small></span></a>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 flex-wrap mt-4">
+    <a class="btn btn-primary" href="/inventory/pickup">Pickup</a>
+    <a class="btn btn-outline-primary" href="/inventory/stock">Stock Balance</a>
+    <a class="btn btn-outline-primary" href="/inventory/products">Daftar Produk</a>
+    <a class="btn btn-outline-primary" href="/inventory/reports">Laporan</a>
+  </div>
+</div>
+<%- include('_productModal') %>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/inventory-products.js"></script>
+<script src="/js/inventory-context.js"></script></body>
+</html>

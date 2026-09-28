@@ -17,26 +17,53 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const $=id=>document.getElementById(id);
 function dateLocal(v){const d=v?new Date(v):new Date();const pad=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;}
 async function api(url,opt={}){const r=await fetch(url,{headers:{'Content-Type':'application/json',...(opt.headers||{})},...opt});const j=await r.json().catch(()=>({success:false,msg:'Response tidak valid'}));if(!r.ok||j.success===false)throw new Error(j.msg||'Request gagal');return j;}
+function stockistOptions(selected=''){
+ const list=Array.isArray(window.INV_STOCKISTS)?window.INV_STOCKISTS:[];
+ return '<option value="">- pilih stockist -</option>'+list.map(x=>`<option value="${esc(x.stkid)}" ${String(selected)===String(x.stkid)?'selected':''}>${esc(x.stkid)} - ${esc(x.namastk||'')}</option>`).join('');
+}
+function renderDestinationStockists(selected=''){
+ if(type!=='transfer'||!window.INV_IS_ADMIN)return;
+ const el=$('dest_stkid'); if(!el)return;
+ el.innerHTML=stockistOptions(selected);
+}
+async function loadDestinationWarehouses(stkid, selectedId=''){
+ const qs=stkid?`?stkid=${encodeURIComponent(stkid)}`:'';
+ const w=await api('/inventory/api/warehouses'+qs);
+ warehouses=w.data||[];
+ const ws=$('gudang_tujuan_id');
+ if(!ws)return;
+ ws.innerHTML='<option value="">- pilih -</option>'+warehouses.map(x=>`<option value="${x.gudang_id}" ${String(selectedId)===String(x.gudang_id)?'selected':''}>${esc(x.kode)} - ${esc(x.nama)}</option>`).join('');
+}
 async function loadRefs(){
  const stockistEl=$('stkid');
- const stockistId=window.INV_IS_ADMIN ? (stockistEl?.value || window.INV_SELECTED_STKID || '') : (window.INV_SESSION_STKID || '');
- const [p,b,s,w]=await Promise.all([
-  api('/inventory/api/products?limit=100'), api('/inventory/api/master/batch'), api('/inventory/api/master/supplier'),
-  api('/inventory/api/warehouses'+(stockistId?`?stkid=${encodeURIComponent(stockistId)}`:''))
+ const sourceStkid=window.INV_IS_ADMIN ? (stockistEl?.value || window.INV_SELECTED_STKID || '') : (window.INV_SESSION_STKID || '');
+ const [p,b,s]=await Promise.all([
+  api('/inventory/api/products?limit=100'), api('/inventory/api/master/batch'), api('/inventory/api/master/supplier')
  ]);
- products=p.rows;batches=b.data.filter(x=>x.aktif);suppliers=s.data.filter(x=>x.aktif);warehouses=w.data;
- const sel=$('supplier_id');sel.innerHTML='<option value="">- pilih -</option>'+suppliers.map(x=>`<option value="${x.supplier_id}">${esc(x.kode)} - ${esc(x.nama)}</option>`).join('');
- const ws=$('gudang_tujuan_id');ws.innerHTML='<option value="">- pilih -</option>'+warehouses.map(x=>`<option value="${x.gudang_id}">${esc(x.kode)} - ${esc(x.nama)}</option>`).join('');
- if(stockistEl && window.INV_IS_ADMIN){
-   stockistEl.addEventListener('change',async()=>{ await reloadWarehouses(); });
+ products=p.rows;batches=b.data.filter(x=>x.aktif);suppliers=s.data.filter(x=>x.aktif);
+ const sel=$('supplier_id');if(sel)sel.innerHTML='<option value="">- pilih -</option>'+suppliers.map(x=>`<option value="${x.supplier_id}">${esc(x.kode)} - ${esc(x.nama)}</option>`).join('');
+ if(type==='transfer'){
+   const destStk=$('dest_stkid');
+   if(window.INV_IS_ADMIN){
+     renderDestinationStockists(sourceStkid);
+     await loadDestinationWarehouses(destStk?.value||sourceStkid);
+     if(stockistEl)stockistEl.addEventListener('change',async()=>{
+       const source=stockistEl.value||'';
+       renderDestinationStockists(source);
+       await loadDestinationWarehouses(source);
+     });
+     if(destStk)destStk.addEventListener('change',async()=>loadDestinationWarehouses(destStk.value||''));
+   }else{
+     await loadDestinationWarehouses(sourceStkid);
+   }
+ }else{
+   const w=await api('/inventory/api/warehouses'+(sourceStkid?`?stkid=${encodeURIComponent(sourceStkid)}`:''));
+   warehouses=w.data||[];
  }
 }
 async function reloadWarehouses(){
- const stkid=$('stkid')?.value || '';
- const w=await api('/inventory/api/warehouses'+(stkid?`?stkid=${encodeURIComponent(stkid)}`:''));
- warehouses=w.data;
- const ws=$('gudang_tujuan_id');
- ws.innerHTML='<option value="">- pilih -</option>'+warehouses.map(x=>`<option value="${x.gudang_id}">${esc(x.kode)} - ${esc(x.nama)}</option>`).join('');
+ const stkid=type==='transfer'&&window.INV_IS_ADMIN ? ($('dest_stkid')?.value||'') : ($('stkid')?.value||'');
+ await loadDestinationWarehouses(stkid);
 }
 function productOptions(selected=''){return '<option value="">- pilih produk -</option>'+products.filter(p=>p.stock_managed).map(p=>`<option value="${esc(p.prdid)}" ${String(selected)===String(p.prdid)?'selected':''}>${esc(p.prdid)} - ${esc(p.prdname)}</option>`).join('');}
 function batchOptions(prdid,selected=''){return '<option value="">- tanpa batch -</option>'+batches.filter(b=>String(b.prdid)===String(prdid)).map(b=>`<option value="${b.batch_id}" ${String(selected)===String(b.batch_id)?'selected':''}>${esc(b.batch_no)}${b.tanggal_expired?' | exp '+esc(b.tanggal_expired):''}</option>`).join('');}
@@ -66,32 +93,56 @@ function collect(){
   else {d.qty=tr.querySelector('.qty').value;if(type==='masuk'){d.harga=tr.querySelector('.harga').value;d.subtotal=tr.querySelector('.subtotal').value;}}
   return d;
  });
- return {stkid:$('stkid')?.value||null,tanggal:$('tanggal').value,supplier_id:$('supplier_id').value||null,gudang_tujuan_id:$('gudang_tujuan_id').value||null,orderno:$('orderno').value.trim()||null,keterangan:$('keterangan').value.trim()||null,details};
+ return {
+  stkid:$('stkid')?.value||null,
+  dest_stkid:type==='transfer'&&window.INV_IS_ADMIN?($('dest_stkid')?.value||null):null,
+  tanggal:$('tanggal').value,
+  supplier_id:$('supplier_id').value||null,
+  gudang_tujuan_id:$('gudang_tujuan_id').value||null,
+  orderno:$('orderno').value.trim()||null,
+  keterangan:$('keterangan').value.trim()||null,
+  details
+ };
 }
-function resetForm(){editingId=null;$('save').disabled=false;$('id').value='';$('tanggal').value=dateLocal(); if($('stkid') && window.INV_IS_ADMIN){$('stkid').disabled=false;$('stkid').value=window.INV_SELECTED_STKID||'';} $('supplier_id').value='';$('gudang_tujuan_id').value='';$('orderno').value='';$('keterangan').value='';$('details').innerHTML='';line();document.querySelectorAll('#form input,#form select,#addLine').forEach(x=>x.disabled=false);$('msg').textContent='';$('modalTitle').textContent='Tambah '+cfg.name;}
+async function resetForm(){
+ editingId=null;$('save').disabled=false;$('id').value='';$('tanggal').value=dateLocal();
+ if($('stkid') && window.INV_IS_ADMIN){$('stkid').disabled=false;$('stkid').value=window.INV_SELECTED_STKID||'';}
+ if(type==='transfer'&&window.INV_IS_ADMIN){renderDestinationStockists($('stkid')?.value||'');await loadDestinationWarehouses($('dest_stkid')?.value||$('stkid')?.value||'');}
+ $('supplier_id').value='';$('gudang_tujuan_id').value='';$('orderno').value='';$('keterangan').value='';$('details').innerHTML='';line();document.querySelectorAll('#form input,#form select,#addLine').forEach(x=>x.disabled=false);$('msg').textContent='';$('modalTitle').textContent='Tambah '+cfg.name;
+}
 function setupFields(){
  $('supplierWrap').style.display=['masuk','retur_beli'].includes(type)?'block':'none';
  $('destWrap').style.display=type==='transfer'?'block':'none';
+ $('destStockistWrap').style.display=type==='transfer'&&window.INV_IS_ADMIN?'block':'none';
  $('orderWrap').style.display=type==='retur_jual'?'block':'none';
  $('dhead').innerHTML='<tr>'+cfg.heads.map(x=>`<th>${x}</th>`).join('')+'</tr>';
 }
 async function loadList(){
  const j=await api(`/inventory/api/transaksi/${type}?page=${page}&limit=20&search=${encodeURIComponent($('search').value)}`);
- $('rows').innerHTML=j.rows.length?j.rows.map(r=>{const id=r[idFields[type]],no=r[noFields[type]];return `<tr><td><a href="#" class="open" data-id="${id}">${esc(no)}</a></td><td>${esc(r.tanggal)}</td><td><span class="badge status-${String(r.status).toLowerCase()}">${esc(r.status)}</span></td><td>${type==='transfer'?`Tujuan #${esc(r.gudang_tujuan_id)}`:esc(r.keterangan||'')}</td><td class="text-end">${r.status==='DRAFT'?`<button class="btn btn-sm btn-outline-primary edit" data-id="${id}">Edit</button> <button class="btn btn-sm btn-outline-success final" data-id="${id}">Final</button> <button class="btn btn-sm btn-outline-danger deldoc" data-id="${id}">Hapus</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="5" class="text-center text-secondary py-4">Belum ada data.</td></tr>';
+ $('rows').innerHTML=j.rows.length?j.rows.map(r=>{const id=r[idFields[type]],no=r[noFields[type]];const info=type==='transfer'?(r.dest_gudang_nama?`${esc(r.dest_namastk||r.dest_stkid||'')} / ${esc(r.dest_gudang_kode||'')} - ${esc(r.dest_gudang_nama)}`:`Tujuan #${esc(r.gudang_tujuan_id)}`):esc(r.keterangan||'');return `<tr><td><a href="#" class="open" data-id="${id}">${esc(no)}</a></td><td>${esc(r.tanggal)}</td><td><span class="badge status-${String(r.status).toLowerCase()}">${esc(r.status)}</span></td><td>${info}</td><td class="text-end">${r.status==='DRAFT'?`<button class="btn btn-sm btn-outline-primary edit" data-id="${id}">Edit</button> <button class="btn btn-sm btn-outline-success final" data-id="${id}">Final</button> <button class="btn btn-sm btn-outline-danger deldoc" data-id="${id}">Hapus</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="5" class="text-center text-secondary py-4">Belum ada data.</td></tr>';
  $('info').textContent=`Halaman ${j.page} / ${j.pages} • ${j.total} data`;$('prev').disabled=j.page<=1;$('next').disabled=j.page>=j.pages;
  document.querySelectorAll('.open').forEach(a=>a.onclick=async e=>{e.preventDefault();openEdit(a.dataset.id)});
  document.querySelectorAll('.edit').forEach(b=>b.onclick=()=>openEdit(b.dataset.id));
  document.querySelectorAll('.final').forEach(b=>b.onclick=()=>finalDoc(b.dataset.id));
  document.querySelectorAll('.deldoc').forEach(b=>b.onclick=()=>deleteDoc(b.dataset.id));
 }
-function getIdFromHeader(h){return h[Object.keys(h).find(k=>k.endsWith('_id')&&k!=='gudang_tujuan_id')];}
 async function openEdit(id){
- const j=await api(`/inventory/api/transaksi/${type}/${id}`);editingId=id;const h=j.header;$('id').value=id;if($('stkid')){$('stkid').value=h.stkid||'';$('stkid').disabled=true;} $('tanggal').value=dateLocal(h.tanggal);$('supplier_id').value=h.supplier_id||'';$('gudang_tujuan_id').value=h.gudang_tujuan_id||'';$('orderno').value=h.orderno||'';$('keterangan').value=h.keterangan||'';$('details').innerHTML='';j.details.forEach(d=>line(d));$('modalTitle').textContent=`Edit ${cfg.name} — ${h[noFields[type]]}`;$('msg').textContent=h.status==='DRAFT'?'':'Transaksi '+h.status+' hanya dapat dilihat.';$('save').disabled=h.status!=='DRAFT';document.querySelectorAll('#form input,#form select,#addLine').forEach(x=>x.disabled=h.status!=='DRAFT');modal.show();
+ const j=await api(`/inventory/api/transaksi/${type}/${id}`);editingId=id;const h=j.header;$('id').value=id;
+ if($('stkid')){$('stkid').value=h.stkid||'';$('stkid').disabled=true;}
+ $('tanggal').value=dateLocal(h.tanggal);$('supplier_id').value=h.supplier_id||'';
+ if(type==='transfer'&&window.INV_IS_ADMIN){renderDestinationStockists(h.dest_stkid||h.stkid||'');await loadDestinationWarehouses(h.dest_stkid||h.stkid||'',h.gudang_tujuan_id||'');}
+ else if(type==='transfer'){await loadDestinationWarehouses(h.stkid||window.INV_SESSION_STKID||'',h.gudang_tujuan_id||'');}
+ $('gudang_tujuan_id').value=h.gudang_tujuan_id||'';$('orderno').value=h.orderno||'';$('keterangan').value=h.keterangan||'';$('details').innerHTML='';j.details.forEach(d=>line(d));
+ $('modalTitle').textContent=`Edit ${cfg.name} — ${h[noFields[type]]}`;$('msg').textContent=h.status==='DRAFT'?'':'Transaksi '+h.status+' hanya dapat dilihat.';$('save').disabled=h.status!=='DRAFT';
+ document.querySelectorAll('#form input,#form select,#addLine').forEach(x=>x.disabled=h.status!=='DRAFT');
+ // Source stockist remains fixed during edit; ADMIN may still change Stockist Tujuan.
+ if(type==='transfer'&&window.INV_IS_ADMIN&&h.status==='DRAFT'){$('dest_stkid').disabled=false;$('gudang_tujuan_id').disabled=false;}
+ modal.show();
 }
 async function finalDoc(id){if(!confirm('FINAL-kan transaksi? Setelah FINAL transaksi tidak dapat diedit/dihapus dan stok akan berubah.'))return;try{await api(`/inventory/api/transaksi/${type}/${id}/final`,{method:'POST',body:'{}'});alert('Transaksi berhasil FINAL.');loadList();}catch(e){alert(e.message)}}
 async function deleteDoc(id){if(!confirm('Hapus transaksi DRAFT ini?'))return;try{await api(`/inventory/api/transaksi/${type}/${id}`,{method:'DELETE'});loadList();}catch(e){alert(e.message)}}
-$('add').onclick=()=>{resetForm();modal.show();};
+$('add').onclick=async()=>{await resetForm();modal.show();};
 $('addLine').onclick=()=>line();
-$('save').onclick=async()=>{try{const body=collect();if(!body.stkid)throw new Error('Stockist wajib dipilih.');if(!body.details.every(d=>d.prdid))throw new Error('Semua detail harus memilih produk.');const url=editingId?`/inventory/api/transaksi/${type}/${editingId}`:`/inventory/api/transaksi/${type}`;const j=await api(url,{method:editingId?'PUT':'POST',body:JSON.stringify(body)});modal.hide();loadList();alert(editingId?'Transaksi diperbarui.':'DRAFT berhasil disimpan.');}catch(e){$('msg').textContent=e.message;}};
+$('save').onclick=async()=>{try{const body=collect();if(!body.stkid)throw new Error('Stockist wajib dipilih.');if(type==='transfer'&&!body.gudang_tujuan_id)throw new Error('Gudang tujuan wajib dipilih.');if(!body.details.every(d=>d.prdid))throw new Error('Semua detail harus memilih produk.');const url=editingId?`/inventory/api/transaksi/${type}/${editingId}`:`/inventory/api/transaksi/${type}`;const j=await api(url,{method:editingId?'PUT':'POST',body:JSON.stringify(body)});modal.hide();loadList();alert(editingId?'Transaksi diperbarui.':'DRAFT berhasil disimpan.');}catch(e){$('msg').textContent=e.message;}};
 $('prev').onclick=()=>{if(page>1){page--;loadList();}};$('next').onclick=()=>{page++;loadList();};$('refresh').onclick=()=>{page=1;loadList();};$('search').addEventListener('keydown',e=>{if(e.key==='Enter'){page=1;loadList();}});
 setupFields();loadRefs().then(loadList).catch(e=>alert(e.message));

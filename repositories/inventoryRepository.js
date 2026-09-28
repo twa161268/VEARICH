@@ -199,11 +199,18 @@ async function listTransactions(type, stkid = null, page=1, limit=20, search='')
     : `JOIN sb_gudang g ON g.gudang_id=h.gudang_id`;
   const count=(await db.query(`SELECT COUNT(*)::int total FROM ${c.header} h ${join} ${where}`,p))[0].total;
   p.push(limit,offset);
+  const destSelect = type==='transfer'
+    ? `gd.stkid AS dest_stkid, msd.namastk AS dest_namastk,
+       gd.kode AS dest_gudang_kode, gd.nama AS dest_gudang_nama`
+    : `NULL::varchar AS dest_stkid, NULL::varchar AS dest_namastk,
+       NULL::varchar AS dest_gudang_kode, NULL::varchar AS dest_gudang_nama`;
   const rows=await db.query(`
-    SELECT h.*,g.stkid,ms.namastk,g.nama AS gudang_nama
+    SELECT h.*,g.stkid,ms.namastk,g.nama AS gudang_nama,
+           ${destSelect}
     FROM ${c.header} h
     ${join}
     LEFT JOIN master_stk ms ON ms.stkid=g.stkid
+    ${type==='transfer' ? 'LEFT JOIN sb_gudang gd ON gd.gudang_id=h.gudang_tujuan_id LEFT JOIN master_stk msd ON msd.stkid=gd.stkid' : ''}
     ${where}
     ORDER BY h.${c.date} DESC,h.${c.id} DESC
     LIMIT $${p.length-1} OFFSET $${p.length}`,p);
@@ -218,11 +225,18 @@ async function getTransaction(type,id,stkid=null){
   const params=[id];
   const scope=stkid ? ' AND g.stkid=$2' : '';
   if(stkid) params.push(stkid);
+  const destSelect = type==='transfer'
+    ? `gd.stkid AS dest_stkid, msd.namastk AS dest_namastk,
+       gd.kode AS dest_gudang_kode, gd.nama AS dest_gudang_nama`
+    : `NULL::varchar AS dest_stkid, NULL::varchar AS dest_namastk,
+       NULL::varchar AS dest_gudang_kode, NULL::varchar AS dest_gudang_nama`;
   const h=(await db.query(`
-    SELECT h.*,g.stkid,ms.namastk,g.nama AS gudang_nama
+    SELECT h.*,g.stkid,ms.namastk,g.nama AS gudang_nama,
+           ${destSelect}
     FROM ${c.header} h
     ${join}
     LEFT JOIN master_stk ms ON ms.stkid=g.stkid
+    ${type==='transfer' ? 'LEFT JOIN sb_gudang gd ON gd.gudang_id=h.gudang_tujuan_id LEFT JOIN master_stk msd ON msd.stkid=gd.stkid' : ''}
     WHERE h.${c.id}=$1 ${scope}`,params))[0];
   if(!h) return null;
   const details=await db.query(`

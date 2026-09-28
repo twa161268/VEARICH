@@ -46,6 +46,33 @@ async function transactionWarehouse(client,type,id,req){
   return row;
 }
 
+async function validateTransferDestination(client, sourceWarehouse, destinationId, req){
+  const dest=(await client.query(`
+    SELECT gudang_id,kode,nama,aktif,stkid
+    FROM sb_gudang
+    WHERE gudang_id=$1 AND aktif=true
+  `,[destinationId])).rows[0];
+
+  if(!dest){
+    const err=new Error('Gudang tujuan tidak valid atau tidak aktif.');
+    err.status=422;
+    throw err;
+  }
+  if(Number(dest.gudang_id)===Number(sourceWarehouse.gudang_id)){
+    const err=new Error('Gudang asal dan tujuan tidak boleh sama.');
+    err.status=422;
+    throw err;
+  }
+
+  const admin=String(req.session.role||'').toLowerCase()==='admin';
+  if(!admin && String(dest.stkid)!==String(sourceWarehouse.stkid)){
+    const err=new Error('Transfer antar stockist hanya dapat dilakukan oleh ADMIN.');
+    err.status=403;
+    throw err;
+  }
+  return dest;
+}
+
 async function validateProductBatch(client, d){
   const p=(await client.query(`SELECT prdid, prdname, stock_managed FROM master_prd WHERE prdid=$1`,[d.prdid])).rows[0];
   if(!p) throw new Error(`Produk ${d.prdid} tidak ditemukan.`);
@@ -80,7 +107,7 @@ async function changeBalance(client,prdid,gudang_id,batch_id,delta){
 async function movement(client,{prdid,batch_id,gudang_id,tipe,ref_table,ref_id,ref_no,qty_in=0,qty_out=0,keterangan,created_by}){
   await client.query(`INSERT INTO sb_stock_movement
     (tanggal,prdid,batch_id,gudang_id,tipe,ref_table,ref_id,ref_no,qty_in,qty_out,keterangan,created_by,created_at)
-    VALUES(NOW(),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NOW())`,
+    VALUES(NOW(),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
     [prdid,batch_id||null,gudang_id,tipe,ref_table,ref_id,ref_no,qty_in,qty_out,keterangan||null,created_by||'SYSTEM']);
 }
 async function begin(client){ await client.query('BEGIN'); await client.query(`SELECT pg_advisory_xact_lock(hashtext('inventory-document-number'))`); }
@@ -96,9 +123,7 @@ async function createTransaction(type,req){
     const wh=await warehouseFor(stkid,client);
     let dest=null;
     if(type==='transfer'){
-      dest=(await client.query(`SELECT gudang_id,kode,nama,aktif,stkid FROM sb_gudang WHERE gudang_id=$1 AND aktif=true`,[body.gudang_tujuan_id])).rows[0];
-      if(!dest) throw new Error('Gudang tujuan tidak valid atau tidak aktif.');
-      if(dest.gudang_id===wh.gudang_id) throw new Error('Gudang asal dan tujuan tidak boleh sama.');
+      dest=await validateTransferDestination(client,wh,body.gudang_tujuan_id,req);
     }
     const no=await repo.nextNo(type,client);
     // gudang_id / gudang_asal_id adalah NOT NULL pada tabel transaksi.
@@ -151,8 +176,7 @@ async function updateTransaction(type,id,req){
       throw new Error('Stockist transaksi tidak boleh diubah saat edit.');
 
     if(type==='transfer'){
-      const dest=(await client.query(`SELECT gudang_id,aktif,stkid FROM sb_gudang WHERE gudang_id=$1 AND aktif=true`,[body.gudang_tujuan_id])).rows[0];
-      if(!dest || dest.gudang_id===wh.gudang_id) throw new Error('Gudang tujuan tidak valid.');
+      await validateTransferDestination(client,wh,body.gudang_tujuan_id,req);
     }
     const updates=[c.date,...c.fields].filter(f=>body[f]!==undefined);
     if(updates.length){
@@ -218,8 +242,7 @@ async function finalize(type,id,req){
     if(!ds.length) throw new Error('Transaksi tidak memiliki detail.');
     let dest=null;
     if(type==='transfer'){
-      dest=(await client.query(`SELECT * FROM sb_gudang WHERE gudang_id=$1 AND aktif=true`,[h.gudang_tujuan_id])).rows[0];
-      if(!dest || dest.gudang_id===wh.gudang_id) throw new Error('Gudang tujuan tidak valid.');
+      dest=await validateTransferDestination(client,wh,h.gudang_tujuan_id,req);
     }
     for(const d of ds){
       await validateProductBatch(client,d);

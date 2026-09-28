@@ -20,42 +20,66 @@ const pool = new Pool({
   connectionTimeoutMillis: 20000,
 });
 
-pool.on('connect', () => {
-  console.log('DB: koneksi baru dibuat');
-});
+// buat Test Saja //
+//pool.on('connect', () => {
+//  console.log('DB: koneksi baru dibuat');
+//});
 
-pool.on('acquire', () => {
-  console.log(
-    `DB: connection acquired | total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`
-  );
-});
+//pool.on('acquire', () => {
+//  console.log(
+//    `DB: connection acquired | total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`
+//  );
+//});
 
-pool.on('remove', () => {
-  console.log('DB: koneksi dilepas');
-});
+//pool.on('remove', () => {
+//  console.log('DB: koneksi dilepas');
+//});
 
-pool.on('error', (err) => {
-  console.error('DB POOL ERROR:', err.message);
-});
+//pool.on('error', (err) => {
+//  console.error('DB POOL ERROR:', err.message);
+//});
 
 async function query(sql, params = []) {
-  const start = Date.now();
+  const totalStart = Date.now();
+
+  let client;
 
   try {
-    const result = await pool.query(sql, params);
+    // Waktu untuk mendapatkan connection dari pool
+    const acquireStart = Date.now();
 
-    const ms = Date.now() - start;
+    client = await pool.connect();
 
-    if (ms > 500) {
-      console.log(`🐢 DB QUERY LAMBAT: ${ms} ms`);
+    const acquireMs = Date.now() - acquireStart;
+
+    // Waktu khusus eksekusi SQL
+    const queryStart = Date.now();
+
+    const result = await client.query(sql, params);
+
+    const queryMs = Date.now() - queryStart;
+    const totalMs = Date.now() - totalStart;
+
+    // Tampilkan kalau cukup lambat
+    if (totalMs > 500) {
+      console.log(
+        `🐢 DB QUERY | acquire=${acquireMs}ms | sql=${queryMs}ms | total=${totalMs}ms`
+      );
       console.log(sql);
     }
 
     return result.rows;
   } catch (err) {
-    const ms = Date.now() - start;
-    console.error(`❌ DB ERROR setelah ${ms} ms:`, err.message);
+    const totalMs = Date.now() - totalStart;
+
+    console.error(`❌ DB ERROR setelah ${totalMs} ms:`, err.message);
+
     throw err;
+  } finally {
+    // Pastikan connection selalu dikembalikan ke pool
+    if (client) {
+      client.release();
+    }
   }
 }
 

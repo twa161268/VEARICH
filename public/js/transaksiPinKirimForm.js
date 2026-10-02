@@ -102,14 +102,14 @@ async function init(){
 $('txForm').addEventListener('submit',async e=>{
  e.preventDefault();
  try{
+  const body={stkid:$('stkid')?.value||'',kirim:$('kirim').value,ongkir:$('ongkir').value,alamat:$('alamat').value,kelurahan:$('kelurahan').value,kecamatan:$('kecamatan').value,wilayah:$('wilayah').value,kota:$('kota').value,kodepos:$('kodepos').value,
+   transactions:S.transactions.map(t=>({orderno:t.orderno,nama:t.nama,nohp:t.nohp,usernamesp:t.usernamesp,namasp:t.namasp,details:t.details.map(d=>({prdid:d.prdid,qty:d.qty}))})),
+   payments:S.payments.map(p=>({paytype:p.paytype,amount:p.amount,catatan:p.catatan}))};
   if(!body.stkid)throw new Error('Stockist wajib dipilih.');
   if(!S.transactions.length)throw new Error('Minimal satu transaksi PIN.');
   if(S.transactions.some(t=>!t.nama.trim()))throw new Error('Nama wajib diisi pada setiap transaksi PIN.');
   if(S.transactions.some(t=>!t.details.length))throw new Error('Setiap transaksi PIN harus memiliki minimal satu produk.');
   if(!S.payments.length)throw new Error('Minimal satu pembayaran.');
-  const body={stkid:$('stkid')?.value||'',kirim:$('kirim').value,ongkir:$('ongkir').value,alamat:$('alamat').value,kelurahan:$('kelurahan').value,kecamatan:$('kecamatan').value,wilayah:$('wilayah').value,kota:$('kota').value,kodepos:$('kodepos').value,
-   transactions:S.transactions.map(t=>({orderno:t.orderno,nama:t.nama,nohp:t.nohp,usernamesp:t.usernamesp,namasp:t.namasp,details:t.details.map(d=>({prdid:d.prdid,qty:d.qty}))})),
-   payments:S.payments.map(p=>({paytype:p.paytype,amount:p.amount,catatan:p.catatan}))};
   const url=window.TX_EDIT?`/transaksi/update/${encodeURIComponent(window.TX_REGISTER)}`:'/transaksi/create';
   const j=await api(url,{method:'POST',body:JSON.stringify(body)});
   alert(j.msg||'Transaksi berhasil disimpan.');location.href='/transaksi';

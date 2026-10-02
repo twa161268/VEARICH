@@ -54,9 +54,11 @@ async function loadData() {
 }
 $('btnTambah').onclick = () => {
   if (window.PINREG_ADMIN) {
-    const f=$('stockistFilter'); const v=f?.value||'';
-    location.href = '/pinreg/form' + (v ? ('?stkid='+encodeURIComponent(v)) : '');
-  } else location.href='/pinreg/form';
+    const f = $('stockistFilter');
+    const v = f?.value || '';
+    location.href =
+      '/pinreg/form' + (v ? '?stkid=' + encodeURIComponent(v) : '');
+  } else location.href = '/pinreg/form';
 };
 $('prev').onclick = () => {
   if (state.page > 1) {
@@ -69,7 +71,11 @@ $('next').onclick = () => {
   loadData();
 };
 const stockistFilter = $('stockistFilter');
-if (stockistFilter) stockistFilter.addEventListener('change', () => { state.page=1; loadData(); });
+if (stockistFilter)
+  stockistFilter.addEventListener('change', () => {
+    state.page = 1;
+    loadData();
+  });
 let timer;
 $('search').addEventListener('input', (e) => {
   clearTimeout(timer);

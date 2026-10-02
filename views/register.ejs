@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registrasi Member</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
-  <link rel="stylesheet" href="/css/register.css" />
+  <link rel="stylesheet" href="<%= asset('/css/bootstrap.min.css') %>" />
+  <link rel="stylesheet" href="<%= asset('/icons/bootstrap-icons.css') %>" />
+  <link rel="stylesheet" href="<%= asset('/css/register.css') %>" />
 </head>
 <body class="bg-light">
   <div class="container-fluid px-3 px-lg-4 py-4">
@@ -94,7 +94,7 @@
     window.REGISTER_PRICECODE = <%- JSON.stringify(pricecode) %>;
     window.REGISTER_ADMIN = <%- JSON.stringify(Boolean(isAdmin)) %>;
   </script>
-  <script src="/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/register.js"></script>
+  <script src="<%= asset('/js/bootstrap.bundle.min.js') %>"></script>
+  <script src="<%= asset('/js/register.js') %>"></script>
 </body>
 </html>

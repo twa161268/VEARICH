@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title><%= edit ? 'Edit' : 'Tambah' %> Pembelian PIN & Pengiriman</title>
-<link rel="stylesheet" href="/css/bootstrap.min.css"><link rel="stylesheet" href="/icons/bootstrap-icons.css"><link rel="stylesheet" href="/css/transaksiPinKirim.css">
+<link rel="stylesheet" href="<%= asset('/css/bootstrap.min.css') %>"><link rel="stylesheet" href="<%= asset('/icons/bootstrap-icons.css') %>"><link rel="stylesheet" href="<%= asset('/css/transaksiPinKirim.css') %>">
 </head>
 <body class="bg-light">
 <div class="container-fluid px-3 px-lg-4 py-4">
@@ -69,5 +69,5 @@ window.TX_EDIT=<%= edit ? 'true':'false' %>;
 window.TX_REGISTER=<%- JSON.stringify(registerno||'') %>;
 window.TX_PRICECODE=<%- JSON.stringify(pricecode||'') %>;window.TX_ADMIN=<%= isAdmin ? 'true':'false' %>;
 </script>
-<script src="/js/bootstrap.bundle.min.js"></script><script src="/js/transaksiPinKirimForm.js"></script>
+<script src="<%= asset('/js/bootstrap.bundle.min.js') %>"></script><script src="<%= asset('/js/transaksiPinKirimForm.js') %>"></script>
 </body></html>

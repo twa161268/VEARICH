@@ -14,6 +14,7 @@ const inventoryRoutes = require('./routes/inventoryRoutes');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./db');
+const asset = require('./utils/asset');
 const app = express();
 
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
@@ -58,6 +59,9 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Helper global untuk versioning asset JS/CSS berdasarkan Git commit.
+app.locals.asset = asset;
 
 //----------------Ini saat Menu terbuka-----------
 app.get('/', (req, res) => {

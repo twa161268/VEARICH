@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Transaksi Pembelian PIN</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/icons/bootstrap-icons.css" />
-    <link rel="stylesheet" href="/css/pinreg.css" />
+    <link rel="stylesheet" href="<%= asset('/css/bootstrap.min.css') %>" />
+    <link rel="stylesheet" href="<%= asset('/icons/bootstrap-icons.css') %>" />
+    <link rel="stylesheet" href="<%= asset('/css/pinreg.css') %>" />
   </head>
   <body class="bg-light">
     <div class="container-fluid px-3 px-lg-4 py-4">
@@ -124,7 +124,7 @@
     <script>
       window.PINREG_PRICECODE = '<%= pricecode %>'; window.PINREG_ADMIN=<%= isAdmin ? 'true' : 'false' %>;
     </script>
-    <script src="/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/pinreg.js"></script>
+    <script src="<%= asset('/js/bootstrap.bundle.min.js') %>"></script>
+    <script src="<%= asset('/js/pinreg.js') %>"></script>
   </body>
 </html>

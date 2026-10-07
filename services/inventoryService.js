@@ -296,15 +296,15 @@ async function pickup(registerno,req){
     if(orders.some(o=>o.stkid!==selected)) throw new Error('Terdapat order dengan stockist yang tidak sesuai.');
     if(orders.some(o=>!o.stbayar)) throw new Error('Semua order dalam registrasi belum lunas.');
     const ordernos=orders.map(o=>o.orderno);
-    // Pricecode diambil dari header tr_pinreg, bukan dari param aktif saat pickup.
-    // Dengan demikian transaksi lama tetap menggunakan pricecode saat transaksi dibuat.
+    // Pricecode diambil dari detail tr_pinregdet,
+    // karena setiap detail menyimpan pricecode saat transaksi dibuat.
     const ds=(await client.query(`
       SELECT
         d.orderno,
         d.prdid,
         d.qty,
         d.pin,
-        r.pricecode,
+        d.pricecode,
         p.stock_managed
       FROM tr_pinregdet d
       JOIN tr_pinreg r ON r.orderno=d.orderno

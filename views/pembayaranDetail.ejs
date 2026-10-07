@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="<%= asset('/css/bootstrap.min.css') %>" />
   <link rel="stylesheet" href="<%= asset('/icons/bootstrap-icons.css') %>" />
   <link rel="stylesheet" href="<%= asset('/css/pembayaran.css') %>" />
+  <link rel="stylesheet" href="<%= asset('/css/loading.css') %>">
 </head>
 <body class="bg-light">
 <div class="container-fluid px-3 px-lg-4 py-4">
@@ -40,5 +41,6 @@
   <% if (!data.payments.length) { %><tr><td colspan="4" class="text-center py-4 text-secondary">Tidak ada data pembayaran.</td></tr><% } %>
   </tbody></table></div></div>
 </div>
+<script src="<%= asset('/js/loading.js') %>"></script>
 </body>
 </html>

@@ -29,7 +29,8 @@
 
 
 
-    </head>
+      <link rel="stylesheet" href="<%= asset('/css/loading.css') %>">
+</head>
     <!--<body id="page-top">-->
     <body id="page-top" data-login="<%= isLogin %>">
         <!-- Navigation-->
@@ -215,5 +216,6 @@
         });
         </script>
 
-    </body>
+    <script src="<%= asset('/js/loading.js') %>"></script>
+</body>
 </html>

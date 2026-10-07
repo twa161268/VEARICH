@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="<%= asset('/css/bootstrap.min.css') %>" />
     <link rel="stylesheet" href="<%= asset('/icons/bootstrap-icons.css') %>" />
     <link rel="stylesheet" href="<%= asset('/css/inventory.css') %>" />
-  </head>
+    <link rel="stylesheet" href="<%= asset('/css/loading.css') %>">
+</head>
   <body>
     <div id="inventoryContext"></div><div class="container-fluid p-3 p-lg-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -165,5 +166,6 @@
         </div>
       </div>
     </div>
-  <script src="<%= asset('/js/inventory-context.js') %>"></script></body>
+  <script src="<%= asset('/js/inventory-context.js') %>"></script><script src="<%= asset('/js/loading.js') %>"></script>
+</body>
 </html>

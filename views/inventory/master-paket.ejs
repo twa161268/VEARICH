@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Master Paket</title>
+  <link rel="stylesheet" href="<%= asset('/css/bootstrap.min.css') %>">
+  <link rel="stylesheet" href="<%= asset('/icons/bootstrap-icons.css') %>">
+  <link rel="stylesheet" href="<%= asset('/css/inventory.css') %>">
+  <link rel="stylesheet" href="<%= asset('/css/loading.css') %>">
+</head>
+<body>
+<div class="container-fluid p-3 p-lg-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
+    <div><div class="eyebrow">MASTER INVENTORY</div><h2 class="fw-bold mb-1">Master Paket</h2><div class="text-secondary">Kelola komposisi produk paket berdasarkan pricecode.</div></div>
+    <div class="d-flex gap-2"><button id="addPack" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Paket</button><a href="/inventory" class="btn btn-outline-secondary">← Inventory</a></div>
+  </div>
+  <div id="alertBox"></div>
+  <div id="packList" class="row g-3"></div>
+</div>
+
+<div class="modal fade" id="packModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="modalTitle">Tambah Master Paket</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="row g-3 mb-3">
+        <div class="col-md-7"><label class="form-label fw-semibold">Produk Paket</label><select id="prdidcat" class="form-select"></select></div>
+        <div class="col-md-5"><label class="form-label fw-semibold">Pricecode</label><select id="pricecode" class="form-select"></select><div class="form-text">Komposisi disimpan per pricecode.</div></div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-2"><div><h6 class="fw-bold mb-0">Komponen Paket</h6><small class="text-secondary">Produk komponen harus tersedia pada pricetab untuk pricecode yang dipilih.</small></div><button type="button" id="addComponent" class="btn btn-sm btn-outline-primary">+ Tambah Komponen</button></div>
+      <div class="table-responsive border rounded-3"><table class="table table-hover align-middle mb-0"><thead><tr><th style="width:55%">Produk Komponen</th><th style="width:20%">Pricecode</th><th style="width:15%">Qty</th><th style="width:10%"></th></tr></thead><tbody id="componentRows"></tbody></table></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button id="savePack" class="btn btn-primary">Simpan</button></div>
+  </div></div>
+</div>
+<script src="<%= asset('/js/bootstrap.bundle.min.js') %>"></script>
+<script src="<%= asset('/js/inventory-master-paket.js') %>"></script>
+<script src="<%= asset('/js/loading.js') %>"></script>
+</body></html>

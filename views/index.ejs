@@ -95,12 +95,15 @@
                         <span>Reg. Member</span>
                     </div>
 
+                    <% if (isAdmin) { %>
                     <div class="menu-item nav-btn" data-url="/stokist">
                         <img src="/images/menu/stockist.png"
                              alt="Data Stockist">
                         <span>Mnj Stockist</span>
                     </div>
 
+                    <% } %>
+                    <% if (isAdmin) { %>
                     <div class="menu-item nav-btn" data-url="/mlogin">
                         <img src="/images/menu/passm.png"
                              alt="Manajemen Password">
@@ -108,6 +111,7 @@
                     </div>
 
 
+                    <% } %>
                     <div class="menu-item nav-btn" data-url="/inventory">
                         <img src="/images/menu/inventory.png"
                              alt="Manajemen Inventory">

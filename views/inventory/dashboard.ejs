@@ -27,6 +27,7 @@
     </div>
     <div class="quick-actions">
       <button type="button" class="quick-action primary" id="addProduct"><span class="quick-icon">+</span><span><strong>Produk</strong><small>Produk + Pricecode</small></span></button>
+      <% if (isAdmin) { %><a class="quick-action" href="/inventory/master/paket"><span class="quick-icon">▦</span><span><strong>Master Paket</strong><small>Komposisi bundling</small></span></a><% } %>
       <a class="quick-action" href="/inventory/transaksi/masuk"><span class="quick-icon">↓</span><span><strong>Barang Masuk</strong><small>Input penerimaan</small></span></a>
       <a class="quick-action" href="/inventory/transaksi/keluar"><span class="quick-icon">↑</span><span><strong>Barang Keluar</strong><small>Input pengeluaran</small></span></a>
       <a class="quick-action" href="/inventory/transaksi/transfer"><span class="quick-icon">⇄</span><span><strong>Transfer</strong><small>Pindah gudang</small></span></a>

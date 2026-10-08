@@ -117,7 +117,15 @@ exports.login = async (req, res) => {
     }
 
     req.session.user = username;
-    req.session.role = String(user.role || '').trim().toLowerCase();
+    const loginRole = String(user.role || '').trim().toLowerCase();
+    if (!['admin', 'stockist'].includes(loginRole)) {
+      return res.status(403).render('login', {
+        captcha: '',
+        error: 'Role user tidak valid. Gunakan role admin atau stockist.',
+      });
+    }
+    // Canonical session role is always `admin` or `stockist`.
+    req.session.role = loginRole;
     // ADMIN tidak terikat pada stockist. STOCKIST terikat pada users.stkid.
     req.session.stkid = req.session.role === 'admin' ? null : user.stkid;
     req.session.inventoryStkid = null;

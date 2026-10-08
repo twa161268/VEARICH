@@ -90,10 +90,10 @@ exports.loadByOrderNo = async (req, res, next) => {
 
 exports.stockists = async (req, res, next) => {
   try {
-    res.json({
-      success: true,
-      data: await db.query(`SELECT stkid,namastk FROM master_stk ORDER BY stkid`),
-    });
+    const data = isAdmin(req)
+      ? await db.query(`SELECT stkid,namastk FROM master_stk ORDER BY stkid`)
+      : await db.query(`SELECT stkid,namastk FROM master_stk WHERE stkid=$1 ORDER BY stkid`, [sessionStkid(req)]);
+    res.json({ success: true, data });
   } catch (err) { next(err); }
 };
 

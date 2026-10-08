@@ -82,6 +82,9 @@ exports.create = async (req, res) => {
 
     const userpass = await bcrypt.hash(userpassword, 10);
     const role = String(userrole || '').trim().toLowerCase();
+    if (!['admin', 'stockist'].includes(role)) {
+      return res.json({ success: false, msg: 'Role harus admin atau stockist.' });
+    }
     const finalStkid = role === 'admin' ? null : (stkid || null);
     if (role !== 'admin' && !finalStkid) {
       return res.json({ success: false, msg: 'User STOCKIST wajib memiliki STKID.' });
@@ -111,6 +114,9 @@ exports.update = async (req, res) => {
     // ❗ penting: jangan ikutkan field WHERE ke data update
 
     const role = String(d.userrole || '').trim().toLowerCase();
+    if (!['admin', 'stockist'].includes(role)) {
+      return res.json({ success: false, msg: 'Role harus admin atau stockist.' });
+    }
     const finalStkid = role === 'admin' ? null : (d.stkid || null);
     if (role !== 'admin' && !finalStkid) {
       return res.json({ success: false, msg: 'User STOCKIST wajib memiliki STKID.' });

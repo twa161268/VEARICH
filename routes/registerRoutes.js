@@ -6,7 +6,7 @@ const { isAuth } = require('../middleware/auth');
 const { requireRole } = require('../middleware/authMiddleware');
 
 router.use(isAuth);
-router.use(requireRole('admin', 'stokist'));
+router.use(requireRole('admin', 'stockist'));
 
 router.get('/', ctrl.page);
 router.get('/form/:registerno', ctrl.form);

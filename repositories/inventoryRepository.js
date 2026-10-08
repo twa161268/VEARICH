@@ -388,3 +388,103 @@ module.exports.getProduct=getProduct;
 module.exports.createProduct=createProduct;
 module.exports.updateProduct=updateProduct;
 module.exports.productUsage=productUsage;
+
+async function listMasterPacks(){
+  return db.query(`
+    SELECT
+      mp.prdidcat,
+      COALESCE(pkg.prdname, mp.prdidcatnm) AS prdidcatnm,
+      mp.pricecode,
+      mp.prdid,
+      COALESCE(comp.prdname, mp.prdname) AS prdname,
+      mp.qty
+    FROM public.master_pak mp
+    LEFT JOIN public.master_prd pkg ON pkg.prdid=mp.prdidcat
+    LEFT JOIN public.pricetab pt ON pt.prdid=mp.prdid AND pt.pricecode=mp.pricecode
+    LEFT JOIN public.master_prd comp ON comp.prdid=mp.prdid
+    WHERE pt.prdid IS NOT NULL
+    ORDER BY mp.prdidcat, mp.pricecode, mp.prdid
+  `);
+}
+
+async function getMasterPack(prdidcat, pricecode){
+  const rows=await db.query(`
+    SELECT
+      mp.prdidcat,
+      COALESCE(pkg.prdname, mp.prdidcatnm) AS prdidcatnm,
+      mp.pricecode,
+      mp.prdid,
+      COALESCE(comp.prdname, mp.prdname) AS prdname,
+      mp.qty
+    FROM public.master_pak mp
+    LEFT JOIN public.master_prd pkg ON pkg.prdid=mp.prdidcat
+    LEFT JOIN public.master_prd comp ON comp.prdid=mp.prdid
+    WHERE mp.prdidcat=$1 AND mp.pricecode=$2
+    ORDER BY mp.prdid
+  `,[prdidcat,pricecode]);
+  if(!rows.length) return null;
+  return {
+    prdidcat:rows[0].prdidcat,
+    prdidcatnm:rows[0].prdidcatnm,
+    pricecode:rows[0].pricecode,
+    components:rows.map(r=>({prdid:r.prdid,prdname:r.prdname,pricecode:r.pricecode,qty:Number(r.qty)}))
+  };
+}
+
+async function getMasterPackForUpdate(client, prdidcat, pricecode){
+  const r=await client.query(`
+    SELECT prdidcat,prdidcatnm,pricecode,prdid,prdname,qty
+    FROM public.master_pak
+    WHERE prdidcat=$1 AND pricecode=$2
+    FOR UPDATE
+  `,[prdidcat,pricecode]);
+  return r.rows[0] || null;
+}
+
+async function masterPakOptions(){
+  const [packages,components]=await Promise.all([
+    db.query(`
+      SELECT p.prdid,p.prdname,ARRAY_AGG(pt.pricecode ORDER BY pt.pricecode) AS pricecodes
+      FROM public.master_prd p
+      JOIN public.pricetab pt ON pt.prdid=p.prdid
+      WHERE COALESCE(p.status,TRUE)=TRUE
+      GROUP BY p.prdid,p.prdname
+      ORDER BY p.prdid
+    `),
+    db.query(`
+      SELECT pt.prdid,pt.pricecode,p.prdname,p.stock_managed
+      FROM public.pricetab pt
+      JOIN public.master_prd p ON p.prdid=pt.prdid
+      WHERE COALESCE(p.status,TRUE)=TRUE
+      ORDER BY pt.pricecode,p.prdid
+    `)
+  ]);
+  return {packages,components};
+}
+
+async function insertMasterPack(client,{prdidcat,prdidcatnm,pricecode,components,actor}){
+  for(const item of components){
+    await client.query(`
+      INSERT INTO public.master_pak
+        (prdidcat,prdidcatnm,prdid,pricecode,prdname,qty,createnm,createdt,updatenm,updatedt)
+      VALUES($1,$2,$3,$4,$5,$6,$7,NOW(),$7,NOW())
+    `,[prdidcat,prdidcatnm,item.prdid,item.pricecode,item.prdname,item.qty,actor]);
+  }
+}
+
+async function replaceMasterPack(client,{prdidcat,prdidcatnm,pricecode,components,actor}){
+  await client.query(`DELETE FROM public.master_pak WHERE prdidcat=$1 AND pricecode=$2`,[prdidcat,pricecode]);
+  await insertMasterPack(client,{prdidcat,prdidcatnm,pricecode,components,actor});
+}
+
+async function deleteMasterPack(client,prdidcat,pricecode){
+  await client.query(`DELETE FROM public.master_pak WHERE prdidcat=$1 AND pricecode=$2`,[prdidcat,pricecode]);
+}
+
+module.exports.listMasterPacks=listMasterPacks;
+module.exports.getMasterPack=getMasterPack;
+module.exports.getMasterPackForUpdate=getMasterPackForUpdate;
+module.exports.masterPakOptions=masterPakOptions;
+module.exports.insertMasterPack=insertMasterPack;
+module.exports.replaceMasterPack=replaceMasterPack;
+module.exports.deleteMasterPack=deleteMasterPack;

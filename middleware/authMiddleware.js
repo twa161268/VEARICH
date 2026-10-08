@@ -20,7 +20,13 @@ function requireRole(...allowedRoles) {
     }
 
     // Cek role
-    if (!allowedRoles.map(r => String(r).toLowerCase()).includes(String(req.session.role || '').toLowerCase())) {
+    const normalizeRole = role => {
+      const value = String(role || '').trim().toLowerCase();
+      return value;
+    };
+    const role = normalizeRole(req.session.role);
+    const allowed = allowedRoles.map(normalizeRole);
+    if (!allowed.includes(role)) {
       return res.status(403).send('Anda tidak memiliki hak akses.');
     }
 

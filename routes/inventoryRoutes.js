@@ -2,6 +2,7 @@ const express=require('express');
 const router=express.Router();
 const c=require('../controllers/inventoryController');
 const {isAuth}=require('../middleware/auth');
+const {requireRole}=require('../middleware/authMiddleware');
 
 router.use(isAuth);
 
@@ -13,23 +14,32 @@ router.get('/dashboard',c.dashboard);
 router.get('/reports',c.reports);
 router.get('/api/reports',c.reportData);
 
-// Master
-router.get('/master/:type',c.master);
-router.get('/api/master/:type',c.masterList);
-router.post('/api/master/:type',c.masterCreate);
-router.put('/api/master/:type/:id',c.masterUpdate);
-router.post('/api/master/:type/:id/deactivate',c.masterDeactivate);
+// Master Paket: ADMIN ONLY
+router.get('/master/paket',requireRole('admin'),c.masterPak);
+router.get('/api/master-paket',requireRole('admin'),c.masterPakList);
+router.get('/api/master-paket/options',requireRole('admin'),c.masterPakOptions);
+router.get('/api/master-paket/:prdidcat/:pricecode',requireRole('admin'),c.masterPakGet);
+router.post('/api/master-paket',requireRole('admin'),c.masterPakCreate);
+router.put('/api/master-paket/:prdidcat/:pricecode',requireRole('admin'),c.masterPakUpdate);
+router.delete('/api/master-paket/:prdidcat/:pricecode',requireRole('admin'),c.masterPakDelete);
+
+// Master: ADMIN ONLY (server-side authorization)
+router.get('/master/:type',requireRole('admin'),c.master);
+router.get('/api/master/:type',requireRole('admin'),c.masterList);
+router.post('/api/master/:type',requireRole('admin'),c.masterCreate);
+router.put('/api/master/:type/:id',requireRole('admin'),c.masterUpdate);
+router.post('/api/master/:type/:id/deactivate',requireRole('admin'),c.masterDeactivate);
 
 router.get('/api/warehouses',c.warehouses);
 
-// Product (existing master_prd)
-router.get('/products',c.products);
-router.get('/api/products',c.productData);
-router.get('/api/products/form-data',c.productFormData);
-router.get('/api/products/:prdid',c.productGet);
-router.post('/api/products',c.productCreate);
-router.put('/api/products/:prdid',c.productUpdate);
-router.post('/api/products/:prdid/deactivate',c.productDeactivate);
+// Product (existing master_prd): ADMIN ONLY
+router.get('/products',requireRole('admin'),c.products);
+router.get('/api/products',requireRole('admin'),c.productData);
+router.get('/api/products/form-data',requireRole('admin'),c.productFormData);
+router.get('/api/products/:prdid',requireRole('admin'),c.productGet);
+router.post('/api/products',requireRole('admin'),c.productCreate);
+router.put('/api/products/:prdid',requireRole('admin'),c.productUpdate);
+router.post('/api/products/:prdid/deactivate',requireRole('admin'),c.productDeactivate);
 
 // Transactions
 router.get('/transaksi/:type',c.transactions);

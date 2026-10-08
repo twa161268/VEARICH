@@ -27,73 +27,110 @@
           >Laporan</a
         >
       </div>
+      <% if (isAdmin) { %>
       <div class="row g-3">
         <div class="col-md-4 col-xl-2">
           <a class="inv-card" href="/inventory/products">
             <b>Produk</b>
-            <img
-              class="inv-card-icon"
-              src="/images/invt/produk.png"
-              alt="Produk"
-            />
+            <div class="inv-card-desc">
+              <img
+                class="inv-card-icon"
+                src="/images/invt/produk.png"
+                alt="Produk"
+              />
+              <span>Daftar Produk</span>
+            </div>
           </a>
         </div>
 
         <div class="col-md-4 col-xl-2">
           <a class="inv-card" href="/inventory/master/satuan">
             <b>Satuan</b>
+            <div class="inv-card-desc">
             <img
               class="inv-card-icon"
               src="/images/invt/satuan.png"
               alt="Satuan"
             />
+            <span>Satuan Product</span>
+            </div>
           </a>
         </div>
 
         <div class="col-md-4 col-xl-2">
           <a class="inv-card" href="/inventory/master/kategori">
             <b>Kategori</b>
+            <div class="inv-card-desc">
             <img
               class="inv-card-icon"
               src="/images/invt/kategori.png"
               alt="Kategori"
             />
+            <span>Kategori Product</span>
+            </div>
           </a>
         </div>
 
         <div class="col-md-4 col-xl-2">
           <a class="inv-card" href="/inventory/master/supplier">
             <b>Supplier</b>
+            <div class="inv-card-desc">
             <img
               class="inv-card-icon"
               src="/images/invt/supplier.png"
               alt="Supplier"
             />
+            <span>Daftar Supplier</span>
+            </div>
           </a>
         </div>
 
         <div class="col-md-4 col-xl-2">
           <a class="inv-card" href="/inventory/master/gudang">
             <b>Gudang</b>
+            <div class="inv-card-desc">
             <img
               class="inv-card-icon"
               src="/images/invt/gudang.png"
               alt="Gudang"
             />
+            <span>Manajemen Gudang</span>
+            </div>
           </a>
         </div>
 
         <div class="col-md-4 col-xl-2">
           <a class="inv-card" href="/inventory/master/batch">
             <b>Batch</b>
+            <div class="inv-card-desc">
             <img
               class="inv-card-icon"
               src="/images/invt/batch.png"
               alt="Batch"
             />
+            <span>Batch Product</span>
+            </div>
           </a>
         </div>
+
+        <div class="col-md-4 col-xl-2">
+          <a class="inv-card" href="/inventory/master/paket">
+            <b>Master Paket</b>
+
+            <div class="inv-card-desc">
+              <img
+                class="inv-card-icon"
+                src="/images/invt/paket.png"
+                alt="Paket"
+              />
+              <span>Komposisi bundling</span>
+            </div>
+          </a>
+        </div>
+
+
       </div>
+      <% } %>
       <h4 class="fw-bold mt-5 mb-3">Transaksi</h4>
 
       <div class="row g-3">

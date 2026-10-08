@@ -1,13 +1,19 @@
 const svc=require('../services/inventoryService');
 const repo=require('../repositories/inventoryRepository');
+const masterPakService=require('../services/masterPakService');
 const db=require('../db');
 const {isAdmin,sessionStkid,scopedStkid,requireStockistScope}=require('../middleware/accessScope');
 
 const TYPES=['masuk','keluar','retur_beli','retur_jual','transfer','adjustment','opname'];
 const names={masuk:'Barang Masuk',keluar:'Barang Keluar',retur_beli:'Retur Pembelian',retur_jual:'Retur Penjualan',transfer:'Transfer Gudang',adjustment:'Adjustment Stock',opname:'Stock Opname'};
 
-async function stockists(){
-  return db.query(`SELECT stkid,namastk FROM master_stk ORDER BY stkid`);
+async function stockists(req){
+  if (!req || isAdmin(req)) {
+    return db.query(`SELECT stkid,namastk FROM master_stk ORDER BY stkid`);
+  }
+  const stkid = sessionStkid(req);
+  if (!stkid) return [];
+  return db.query(`SELECT stkid,namastk FROM master_stk WHERE stkid=$1 ORDER BY stkid`,[stkid]);
 }
 function selectedContext(req){
   return isAdmin(req) ? (req.session.inventoryStkid || null) : sessionStkid(req);
@@ -19,7 +25,7 @@ async function requireAdmin(req,res){
 
 exports.context=async(req,res)=>{
   try{
-    const rows=await stockists();
+    const rows=await stockists(req);
     res.json({success:true,isAdmin:isAdmin(req),sessionStkid:sessionStkid(req),selectedStkid:selectedContext(req),stockists:rows});
   }catch(e){res.status(400).json({success:false,msg:e.message});}
 };
@@ -42,12 +48,12 @@ exports.setContext=async(req,res)=>{
   }catch(e){res.status(400).json({success:false,msg:e.message});}
 };
 
-exports.home=async(req,res)=>res.render('inventory/index',{user:req.session.user,role:req.session.role,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),sessionStkid:sessionStkid(req),stockists:await stockists()});
-exports.dashboard=async(req,res)=>{try{res.render('inventory/dashboard',{user:req.session.user,role:req.session.role,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(),stats:await svc.getDashboard(req,selectedContext(req))})}catch(e){console.error(e);res.status(500).send('Gagal memuat dashboard inventory.')}};
-exports.reports=async(req,res)=>res.render('inventory/reports',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists()});
+exports.home=async(req,res)=>res.render('inventory/index',{user:req.session.user,role:req.session.role,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),sessionStkid:sessionStkid(req),stockists:await stockists(req)});
+exports.dashboard=async(req,res)=>{try{res.render('inventory/dashboard',{user:req.session.user,role:req.session.role,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(req),stats:await svc.getDashboard(req,selectedContext(req))})}catch(e){console.error(e);res.status(500).send('Gagal memuat dashboard inventory.')}};
+exports.reports=async(req,res)=>res.render('inventory/reports',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(req)});
 exports.reportData=async(req,res)=>{try{res.json({success:true,data:await svc.getMovements(req,{...req.query,stkid:selectedContext(req)})})}catch(e){res.status(400).json({success:false,msg:e.message});}};
 
-exports.master=async(req,res)=>res.render('inventory/master',{type:req.params.type,user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),sessionStkid:sessionStkid(req),stockists:await stockists()});
+exports.master=async(req,res)=>{if(!isAdmin(req))return res.status(403).send('Menu ini hanya dapat diakses ADMIN.'); return res.render('inventory/master',{type:req.params.type,user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),sessionStkid:sessionStkid(req),stockists:await stockists(req)});};
 exports.masterList=async(req,res)=>{try{res.json({success:true,data:await repo.getMaster(req.params.type,selectedContext(req))})}catch(e){console.error(e);res.status(400).json({success:false,msg:e.message});}};
 exports.masterCreate=async(req,res)=>{
  try{
@@ -99,7 +105,7 @@ exports.warehouses=async(req,res)=>{
  }catch(e){res.status(400).json({success:false,msg:e.message});}
 };
 
-exports.products=async(req,res)=>res.render('inventory/products',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists()});
+exports.products=async(req,res)=>{if(!isAdmin(req))return res.status(403).send('Menu ini hanya dapat diakses ADMIN.'); return res.render('inventory/products',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(req)});};
 exports.productData=async(req,res)=>{try{const page=Number(req.query.page||1),limit=Math.min(100,Math.max(1,Number(req.query.limit||20))),search=(req.query.search||'').trim();res.json({success:true,...await repo.getProducts(null,page,limit,search)})}catch(e){res.status(400).json({success:false,msg:e.message});}};
 exports.productFormData=async(req,res)=>{try{res.json({success:true,...await repo.getProductFormData()})}catch(e){res.status(400).json({success:false,msg:e.message});}};
 exports.productGet=async(req,res)=>{try{const data=await repo.getProduct(req.params.prdid);if(!data)return res.status(404).json({success:false,msg:'Produk tidak ditemukan.'});res.json({success:true,...data})}catch(e){res.status(400).json({success:false,msg:e.message});}};
@@ -109,7 +115,7 @@ exports.productDeactivate=async(req,res)=>{if(!await requireAdmin(req,res))retur
 
 exports.transactions=async(req,res)=>{
  const type=req.params.type;if(!TYPES.includes(type))return res.status(404).send('Jenis transaksi tidak ditemukan.');
- res.render('inventory/transactions',{type,title:names[type],user:req.session.user,role:req.session.role,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),sessionStkid:sessionStkid(req),stockists:await stockists()});
+ res.render('inventory/transactions',{type,title:names[type],user:req.session.user,role:req.session.role,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),sessionStkid:sessionStkid(req),stockists:await stockists(req)});
 };
 exports.transactionData=async(req,res)=>{try{res.json({success:true,...await repo.listTransactions(req.params.type,selectedContext(req),Number(req.query.page||1),Math.min(100,Math.max(1,Number(req.query.limit||20))),(req.query.search||'').trim())})}catch(e){res.status(400).json({success:false,msg:e.message})}};
 exports.transactionGet=async(req,res)=>{try{const d=await repo.getTransaction(req.params.type,req.params.id,isAdmin(req)?null:sessionStkid(req));if(!d)return res.status(404).json({success:false,msg:'Transaksi tidak ditemukan.'});res.json({success:true,...d})}catch(e){res.status(400).json({success:false,msg:e.message})}};
@@ -119,11 +125,11 @@ exports.transactionDelete=async(req,res)=>{try{await svc.deleteTransaction(req.p
 exports.transactionCancel=async(req,res)=>{try{await svc.cancelTransaction(req.params.type,req.params.id,req);res.json({success:true})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
 exports.transactionFinal=async(req,res)=>{try{const d=await svc.finalize(req.params.type,req.params.id,req);res.json({success:true,data:d})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
 
-exports.stock=async(req,res)=>res.render('inventory/stock',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists()});
+exports.stock=async(req,res)=>res.render('inventory/stock',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(req)});
 exports.stockData=async(req,res)=>{try{res.json({success:true,...await svc.getStock(req,Number(req.query.page||1),Math.min(100,Math.max(1,Number(req.query.limit||25))),(req.query.search||'').trim(),selectedContext(req))})}catch(e){res.status(400).json({success:false,msg:e.message})}};
-exports.movement=async(req,res)=>res.render('inventory/movement',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists()});
+exports.movement=async(req,res)=>res.render('inventory/movement',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(req)});
 exports.movementData=async(req,res)=>{try{res.json({success:true,data:await svc.getMovements(req,{...req.query,stkid:selectedContext(req)})})}catch(e){res.status(400).json({success:false,msg:e.message})}};
-exports.pickup=async(req,res)=>res.render('inventory/pickup',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists()});
+exports.pickup=async(req,res)=>res.render('inventory/pickup',{user:req.session.user,isAdmin:isAdmin(req),selectedStkid:selectedContext(req),stockists:await stockists(req)});
 exports.pickupData=async(req,res)=>{try{res.json({success:true,...await svc.getPickupList(req,Number(req.query.page||1),Math.min(100,Math.max(1,Number(req.query.limit||20))),(req.query.search||'').trim(),selectedContext(req))})}catch(e){res.status(400).json({success:false,msg:e.message})}};
 exports.pickupProcess=async(req,res)=>{try{await svc.pickup(req.params.registerno,req);res.json({success:true,msg:'Pickup berhasil diproses dan stok telah dikeluarkan.'})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
 exports.pickupCancel=async(req,res)=>{
@@ -134,4 +140,17 @@ exports.pickupCancel=async(req,res)=>{
   res.json({success:true});
  }catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message});}
 };
+exports.masterPak=async(req,res)=>{
+  if(!isAdmin(req)) return res.status(403).send('Master Paket hanya dapat diakses ADMIN.');
+  try{
+    res.render('inventory/master-paket',{user:req.session.user,isAdmin:true});
+  }catch(e){res.status(500).send('Gagal memuat Master Paket.');}
+};
+exports.masterPakList=async(req,res)=>{try{res.json({success:true,data:await masterPakService.list()})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
+exports.masterPakOptions=async(req,res)=>{try{res.json({success:true,...await masterPakService.options()})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
+exports.masterPakGet=async(req,res)=>{try{res.json({success:true,data:await masterPakService.detail(req.params.prdidcat,req.params.pricecode)})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
+exports.masterPakCreate=async(req,res)=>{try{res.json({success:true,data:await masterPakService.create(req)})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
+exports.masterPakUpdate=async(req,res)=>{try{res.json({success:true,data:await masterPakService.update(req)})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
+exports.masterPakDelete=async(req,res)=>{try{res.json({success:true,data:await masterPakService.remove(req)})}catch(e){console.error(e);res.status(e.status||400).json({success:false,msg:e.message})}};
+
 module.exports=exports;

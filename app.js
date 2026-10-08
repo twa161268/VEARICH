@@ -68,6 +68,8 @@ app.get('/', (req, res) => {
   res.render('index', {
     isLogin: !!req.session.user,
     user: req.session.user || null,
+    role: req.session.role || null,
+    isAdmin: String(req.session.role || '').toLowerCase() === 'admin',
   });
 });
 

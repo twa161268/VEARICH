@@ -9,7 +9,7 @@ const ctrl = require('../controllers/pinregController');
 const { isAuth } = require('../middleware/auth');
 
 router.use(isAuth);
-router.get('/', requireRole('ADMIN', 'STOKIST'), ctrl.index);
+router.get('/', requireRole('ADMIN', 'STOCKIST'), ctrl.index);
 router.get('/', ctrl.page);
 router.get('/form', ctrl.form);
 router.get('/form/:orderno', ctrl.form);
@@ -34,7 +34,7 @@ const { isAuth } = require('../middleware/auth');
 const { requireRole } = require('../middleware/authMiddleware');
 
 router.use(isAuth);
-router.use(requireRole('admin', 'stokist'));
+router.use(requireRole('admin', 'stockist'));
 
 router.get('/', ctrl.page);
 

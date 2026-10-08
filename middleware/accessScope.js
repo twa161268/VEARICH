@@ -1,5 +1,6 @@
 function normalizeRole(role) {
-  return String(role || '').trim().toLowerCase();
+  const value = String(role || '').trim().toLowerCase();
+  return value;
 }
 
 function isAdmin(req) {
@@ -7,7 +8,7 @@ function isAdmin(req) {
 }
 
 function isStockist(req) {
-  return normalizeRole(req.session?.role) === 'stokist';
+  return normalizeRole(req.session?.role) === 'stockist';
 }
 
 function sessionStkid(req) {

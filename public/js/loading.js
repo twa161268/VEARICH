@@ -113,6 +113,32 @@
     window.StockistLoading.show(link.getAttribute('data-loading-text') || 'Memuat halaman...');
   }, true);
 
+  // Saat browser memakai Back/Forward Cache (bfcache), halaman lama dapat
+  // dipulihkan beserta overlay loading yang sebelumnya masih aktif. Reset
+  // seluruh status saat halaman dipulihkan agar layar tidak terkunci loading.
+  window.addEventListener('pageshow', function () {
+    activeRequests = 0;
+    clearTimeout(showTimer);
+    clearTimeout(hideTimer);
+    var overlay = document.getElementById('globalLoadingOverlay');
+    if (overlay) {
+      overlay.classList.remove('is-visible');
+      overlay.setAttribute('aria-busy', 'false');
+    }
+  });
+
+  // Jika halaman masuk bfcache, jangan simpan overlay dalam keadaan aktif.
+  window.addEventListener('pagehide', function () {
+    activeRequests = 0;
+    clearTimeout(showTimer);
+    clearTimeout(hideTimer);
+    var overlay = document.getElementById('globalLoadingOverlay');
+    if (overlay) {
+      overlay.classList.remove('is-visible');
+      overlay.setAttribute('aria-busy', 'false');
+    }
+  });
+
   // Public helper for custom operations that are not fetch/form based.
   window.showLoading = function (message) { window.StockistLoading.show(message); };
   window.hideLoading = function () { window.StockistLoading.hide(); };

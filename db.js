@@ -2,88 +2,77 @@ require('dotenv').config();
 
 const { Pool } = require('pg');
 
+// Gunakan Supabase Transaction Pooler (port 6543) untuk aplikasi yang dapat
+// menjalankan banyak request/instance. Ambil URI lengkap dari Supabase:
+// Project Settings > Database > Connection string > Transaction pooler.
+// Jangan menaruh kredensial database di source code.
+const connectionString = process.env.DATABASE_URL2 || process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL2 atau DATABASE_URL wajib diisi.');
+}
+
+const poolMax = Math.max(1, Math.min(10, Number(process.env.DB_POOL_MAX) || 3));
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL2,
-
-  ssl: {
-    rejectUnauthorized: false,
-  },
-
-  // Batasi koneksi agar tidak menghabiskan
-  // connection pool Supabase
-  max: 5,
-
-  // Jangan terlalu lama menunggu koneksi idle
-  idleTimeoutMillis: 30000,
-
-  // Batasi waktu menunggu koneksi
-  connectionTimeoutMillis: 20000,
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+  // Default 3 per proses agar beberapa instance tidak cepat menghabiskan
+  // batas client Supabase. Bisa disetel melalui environment DB_POOL_MAX.
+  max: poolMax,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
+  // Daur ulang koneksi setelah sejumlah penggunaan untuk mengurangi
+  // koneksi lama yang tertahan pada proses yang berjalan lama.
+  maxUses: 7500,
 });
 
-// buat Test Saja //
-//pool.on('connect', () => {
-//  console.log('DB: koneksi baru dibuat');
-//});
+pool.on('error', (err) => {
+  console.error('DB POOL IDLE CLIENT ERROR:', err.message);
+});
 
-//pool.on('acquire', () => {
-//  console.log(
-//    `DB: connection acquired | total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`
-//  );
-//});
-
-//pool.on('remove', () => {
-//  console.log('DB: koneksi dilepas');
-//});
-
-//pool.on('error', (err) => {
-//  console.error('DB POOL ERROR:', err.message);
-//});
-
-async function query(sql, params = []) {
-  const totalStart = Date.now();
-
-  let client;
-
-  try {
-    // Waktu untuk mendapatkan connection dari pool
-    const acquireStart = Date.now();
-
-    client = await pool.connect();
-
-    const acquireMs = Date.now() - acquireStart;
-
-    // Waktu khusus eksekusi SQL
-    const queryStart = Date.now();
-
-    const result = await client.query(sql, params);
-
-    const queryMs = Date.now() - queryStart;
-    const totalMs = Date.now() - totalStart;
-
-    // Tampilkan kalau cukup lambat
-    if (totalMs > 500) {
-      console.log(
-        `🐢 DB QUERY | acquire=${acquireMs}ms | sql=${queryMs}ms | total=${totalMs}ms`
+// Log ringkas ketika pool mulai antre/penuh; tidak mencetak password/URI.
+let lastPoolWarning = 0;
+function logPoolState() {
+  if (pool.waitingCount > 0) {
+    const now = Date.now();
+    if (now - lastPoolWarning > 10000) {
+      lastPoolWarning = now;
+      console.warn(
+        `DB POOL WAITING | total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount} max=${poolMax}`
       );
-      console.log(sql);
-    }
-
-    return result.rows;
-  } catch (err) {
-    const totalMs = Date.now() - totalStart;
-
-    console.error(`❌ DB ERROR setelah ${totalMs} ms:`, err.message);
-
-    throw err;
-  } finally {
-    // Pastikan connection selalu dikembalikan ke pool
-    if (client) {
-      client.release();
     }
   }
 }
 
-module.exports = {
-  query,
-  pool,
-};
+async function query(sql, params = []) {
+  const totalStart = Date.now();
+  let client;
+
+  try {
+    const acquireStart = Date.now();
+    client = await pool.connect();
+    const acquireMs = Date.now() - acquireStart;
+
+    const queryStart = Date.now();
+    const result = await client.query(sql, params);
+    const queryMs = Date.now() - queryStart;
+    const totalMs = Date.now() - totalStart;
+
+    logPoolState();
+    if (totalMs > 1000) {
+      console.warn(
+        `DB QUERY LAMBAT | acquire=${acquireMs}ms | sql=${queryMs}ms | total=${totalMs}ms | totalConn=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`
+      );
+    }
+    return result.rows;
+  } catch (err) {
+    console.error(`DB ERROR setelah ${Date.now() - totalStart} ms:`, err.message);
+    throw err;
+  } finally {
+    if (client) client.release();
+    logPoolState();
+  }
+}
+
+module.exports = { query, pool };

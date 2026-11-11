@@ -55,6 +55,14 @@ async function getDetail(registerno, stkid = null) {
   return { header, registrations };
 }
 
+async function getRegistrationCard(registerno, username, stkid = null) {
+  return repo.getRegistrationCard(
+    String(registerno || '').trim(),
+    String(username || '').trim(),
+    stkid
+  );
+}
+
 async function products(pricecode, search) {
   if (!pricecode) throw validation('Pricecode pada session belum tersedia.');
   return repo.listProducts(pricecode, search);
@@ -199,6 +207,7 @@ module.exports = {
   actor,
   listRegisters,
   getDetail,
+  getRegistrationCard,
   products,
   save,
 };

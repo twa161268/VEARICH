@@ -120,6 +120,33 @@ async function listRegistrations(registerno) {
   );
 }
 
+
+async function getRegistrationCard(registerno, username, stkid = null) {
+  const result = await db.query(
+    `
+    SELECT
+      r.registerno,
+      r.username,
+      r.usernamesp,
+      r.prdid,
+      p.prdname,
+      r.createdt,
+      k.stkid
+    FROM public.tr_register r
+    INNER JOIN public.tr_kirim k
+      ON k.registerno = r.registerno
+    LEFT JOIN public.master_prd p
+      ON p.prdid = r.prdid
+    WHERE r.registerno = $1
+      AND r.username = $2
+      ${stkid ? 'AND k.stkid = $3' : ''}
+    LIMIT 1
+    `,
+    stkid ? [registerno, username, stkid] : [registerno, username]
+  );
+  return result[0] || null;
+}
+
 async function listProducts(pricecode, search = '') {
   const q = `%${String(search).trim()}%`;
 
@@ -250,6 +277,7 @@ module.exports = {
   getRegisterForUpdate,
   getRegister,
   listRegistrations,
+  getRegistrationCard,
   listProducts,
   getProduct,
   getUsedPin,

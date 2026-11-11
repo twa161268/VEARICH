@@ -14,6 +14,7 @@ router.get('/form/:registerno', ctrl.form);
 router.get('/load', ctrl.load);
 router.get('/load/:registerno', ctrl.detail);
 router.get('/products', ctrl.products);
+router.get('/card/:registerno/:username', ctrl.card);
 
 router.post('/save/:registerno', ctrl.save);
 

@@ -94,6 +94,28 @@ exports.detail = async (req, res) => {
   }
 };
 
+exports.card = async (req, res) => {
+  try {
+    const registerno = String(req.params.registerno || '').trim();
+    const username = String(req.params.username || '').trim();
+    const data = await service.getRegistrationCard(
+      registerno,
+      username,
+      isAdmin(req) ? null : sessionStkid(req)
+    );
+
+    if (!data) return res.status(404).send('Data member tidak ditemukan.');
+
+    res.render('memberCard', {
+      member: data,
+      printMode: req.query.print === '1',
+    });
+  } catch (err) {
+    console.error('❌ CETAK KARTU MEMBER ERROR:', err);
+    res.status(500).send('Gagal menampilkan kartu member.');
+  }
+};
+
 exports.products = async (req, res) => {
   try {
     const pricecode = req.session?.param?.pricecode;

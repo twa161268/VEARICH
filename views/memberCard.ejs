@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kartu Member - <%= member.username %></title>
+  <style>
+    @page { size: 85.6mm 54mm; margin: 0; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; width: 85.6mm; min-height: 54mm;
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .toolbar {
+      width: 100%; padding: 12px; display: flex; justify-content: center;
+      gap: 8px; background: #f3f4f6;
+    }
+    .toolbar button {
+      border: 0; border-radius: 6px; padding: 9px 16px;
+      background: #1769e0; color: white; font-weight: 700; cursor: pointer;
+    }
+    .toolbar a { color: #333; padding: 9px 12px; text-decoration: none; }
+    .card {
+      position: relative; width: 85.6mm; height: 54mm;
+      overflow: hidden; background: url('/assets/img/member-card-background.jpg') center / 100% 100% no-repeat;
+      page-break-after: avoid; break-after: avoid;
+    }
+    .username {
+      position: absolute; left: 8.5%; top: 40.5%; width: 75%;
+      font-size: 5.25mm; line-height: 1.05; font-weight: 800;
+      color: #050505; letter-spacing: .1mm; overflow-wrap: anywhere;
+    }
+    .sponsor {
+      position: absolute; left: 8.7%; top: 53.3%; width: 76%;
+      font-size: 2.9mm; line-height: 1.1; font-weight: 700;
+      color: #050505; overflow-wrap: anywhere;
+    }
+    .product {
+      position: absolute; left: 8.5%; bottom: 16.5%; width: 78%;
+      color: #050505; font-family: Georgia, 'Times New Roman', serif;
+      font-weight: 700; font-size: 4.8mm; line-height: 1;
+      overflow-wrap: anywhere;
+    }
+    .join-date {
+      position: absolute; right: 3.5%; bottom: 6.7%; width: 35%;
+      text-align: right; color: #fff; font-family: Georgia, 'Times New Roman', serif;
+      font-weight: 700; font-size: 2.25mm; white-space: nowrap;
+    }
+    @media screen {
+      body { width: 100%; min-height: 100vh; background: #e9ecef; }
+      .card { margin: 18px auto; box-shadow: 0 3px 18px rgba(0,0,0,.2); }
+    }
+    @media print {
+      html, body { width: 85.6mm; height: 54mm; }
+      .toolbar { display: none !important; }
+      .card { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">Cetak Kartu</button>
+    <a href="javascript:window.close()">Tutup</a>
+  </div>
+  <main class="card" aria-label="Kartu member Vearich">
+    <div class="username"><%= member.username %></div>
+    <div class="sponsor">Sponsor : <%= member.usernamesp || '-' %></div>
+    <div class="product"><%= member.prdname || member.prdid || '-' %></div>
+    <div class="join-date"><%= member.createdt ? new Date(member.createdt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replaceAll('/', '-') : '-' %></div>
+  </main>
+  <script>
+    <% if (printMode) { %>window.addEventListener('load', () => window.print());<% } %>
+  </script>
+</body>
+</html>
